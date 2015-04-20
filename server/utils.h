@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -5,6 +8,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <string.h>
 
 static inline char *
 put_8(char *buf, uint8_t c)
@@ -89,3 +93,5 @@ mode_to_16(mode_t mode)
 {
     return mode;
 }
+
+#endif
