@@ -10,7 +10,6 @@ typedef struct {
 
 /* 2.2 */
 typedef struct {
-    TL tl;// type=1, length=5
     uint8_t version; // 1
     uint8_t magic; // 116
 } TLV_CONNECT;
@@ -20,14 +19,12 @@ typedef TL TLV_ASK_FILES;
 
 /* 2.4 */
 typedef struct {
-    TL tl; // type=3, length=12
     uint8_t reserved;
     uint8_t entries[8];
 } TLV_ENTRIES;
 
 /* #2.5 */
 typedef struct {
-    TL tl; // type=4, length=?
     uint8_t reserved;
     uint8_t mod_time [8];
     uint8_t size [8];
@@ -36,13 +33,11 @@ typedef struct {
 
 /* #2.6 */
 typedef struct {
-    TL tl; // type=5, length=?
     char * filename;
 } TLV_ASK_FILE;
 
 /* #2.7 */
 typedef struct {
-    TL tl; // type=6, length=?
     uint8_t reserved;
     uint8_t mod_time[8];
     uint8_t size[8];
@@ -52,8 +47,22 @@ typedef struct {
 
 /* #2.8 */
 typedef struct {
-    TL tl; // type=7, length=?
     char * filename;
 } TLV_DELETE_FILE;
+
+union VALUE {
+    TLV_CONNECT tlv_connect;
+    TLV_ASK_FILES tlv_ask_files;
+    TLV_ENTRIES tlv_entries;
+    TLV_ENTRY tlv_entry;
+    TLV_ASK_FILE tlv_ask;
+    TLV_META_FILE tlv_meta_file;
+    TLV_DELETE_FILE tlv_delete_file;
+};
+
+typedef struct {
+    TL tl;
+    union VALUE value;
+} TLV;
 
 #endif
