@@ -2,6 +2,7 @@
 #define PROTOCOL_H
 
 #include <stdint.h>
+#include <string.h>
 
 #define PROTOCOL_VERSION 1;
 
@@ -12,7 +13,7 @@
 #define TLV_ASK_FILE_TYPE 5;
 #define TLV_META_TYPE 6;
 #define TLV_DELETE_TYPE 7;
-#define TLV_ERROR 8;
+#define TLV_ERROR_TYPE 8;
 
 #define TLV_CONNECT_LENGTH 5;
 #define TLV_ASK_FILES_LENGTH 3;
@@ -25,8 +26,8 @@ typedef struct {
 
 /* 2.2 */
 typedef struct {
-    uint8_t version; // 1
-    uint8_t magic; // 116
+    uint8_t version;
+    uint8_t magic;
 } TLV_CONNECT;
 
 /* 2.3 */
@@ -41,7 +42,7 @@ typedef struct {
 /* #2.5 */
 typedef struct {
     uint8_t reserved;
-    uint64_t mod_time;
+    uint64_t mtime;
     uint64_t size;
     char * filename;
 } TLV_ENTRY;
@@ -54,7 +55,7 @@ typedef struct {
 /* #2.7 */
 typedef struct {
     uint8_t reserved;
-    uint64_t mod_time;
+    uint64_t mtime;
     uint64_t size;
     uint16_t mode;
     char * filename;
