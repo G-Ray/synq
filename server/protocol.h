@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define PROTOCOL_VERSION 1;
+
 #define TLV_CONNECT_TYPE 1;
 #define TLV_ASK_FILES_TYPE 2;
 #define TLV_ENTRIES_TYPE 3;
@@ -10,6 +12,7 @@
 #define TLV_ASK_FILE_TYPE 5;
 #define TLV_META_TYPE 6;
 #define TLV_DELETE_TYPE 7;
+#define TLV_ERROR 8;
 
 #define TLV_CONNECT_LENGTH 5;
 #define TLV_ASK_FILES_LENGTH 3;
@@ -62,6 +65,12 @@ typedef struct {
     char * filename;
 } TLV_DELETE_FILE;
 
+/* #2.9 */
+typedef struct {
+    uint8_t errno;
+    char * filename;
+} TLV_ERROR;
+
 union VALUE{
     TLV_CONNECT tlv_connect;
     TLV_ENTRIES tlv_entries;
@@ -69,6 +78,7 @@ union VALUE{
     TLV_ASK_FILE tlv_ask_file;
     TLV_META_FILE tlv_meta_file;
     TLV_DELETE_FILE tlv_delete_file;
+    TLV_ERROR tlv_error;
 };
 
 typedef struct {
