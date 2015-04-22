@@ -3,6 +3,18 @@
 
 #include <stdint.h>
 
+#define TLV_CONNECT_TYPE 1;
+#define TLV_ASK_FILES_TYPE 2;
+#define TLV_ENTRIES_TYPE 3;
+#define TLV_ENTRY_TYPE 4;
+#define TLV_ASK_FILE_TYPE 5;
+#define TLV_META_TYPE 6;
+#define TLV_DELETE_TYPE 7;
+
+#define TLV_CONNECT_LENGTH 5;
+#define TLV_ASK_FILES_LENGTH 3;
+#define TLV_ENTRIES_LENGTH 12;
+
 typedef struct {
     uint8_t type;
     uint16_t length;
@@ -15,19 +27,19 @@ typedef struct {
 } TLV_CONNECT;
 
 /* 2.3 */
-typedef TL TLV_ASK_FILES;
+//typedef TL TLV_ASK_FILES;
 
 /* 2.4 */
 typedef struct {
     uint8_t reserved;
-    uint8_t entries[8];
+    uint64_t entries;
 } TLV_ENTRIES;
 
 /* #2.5 */
 typedef struct {
     uint8_t reserved;
-    uint8_t mod_time [8];
-    uint8_t size [8];
+    uint64_t mod_time;
+    uint64_t size;
     char * filename;
 } TLV_ENTRY;
 
@@ -39,8 +51,8 @@ typedef struct {
 /* #2.7 */
 typedef struct {
     uint8_t reserved;
-    uint8_t mod_time[8];
-    uint8_t size[8];
+    uint64_t mod_time;
+    uint64_t size;
     uint16_t mode;
     char * filename;
 } TLV_META_FILE;
@@ -50,12 +62,11 @@ typedef struct {
     char * filename;
 } TLV_DELETE_FILE;
 
-union VALUE {
+union VALUE{
     TLV_CONNECT tlv_connect;
-    TLV_ASK_FILES tlv_ask_files;
     TLV_ENTRIES tlv_entries;
     TLV_ENTRY tlv_entry;
-    TLV_ASK_FILE tlv_ask;
+    TLV_ASK_FILE tlv_ask_file;
     TLV_META_FILE tlv_meta_file;
     TLV_DELETE_FILE tlv_delete_file;
 };
