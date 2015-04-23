@@ -87,4 +87,30 @@ typedef struct {
     union VALUE value;
 } TLV;
 
+/* Prototypes */
+int
+init_tlv_connect(TLV * tlv);
+
+int
+init_tlv_ask_files(TLV * tlv);
+
+int
+init_tlv_entries(TLV * tlv, uint64_t entries);
+
+int
+init_tlv_entry(TLV * tlv, uint64_t mtime, uint64_t size, char * filename);
+
+int
+init_tlv_ask_file(TLV * tlv, char * filename);
+
+int
+init_tlv_meta_file(TLV * tlv, uint64_t mtime, uint64_t size, uint16_t mode,
+                            char * filename);
+
+int
+init_tlv_delete(TLV *tlv, char * filename);
+
+int
+init_tlv_error(TLV * tlv, uint8_t errno, char * filename);
+
 #endif
