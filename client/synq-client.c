@@ -3,9 +3,27 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <sys/stat.h>
 
 #include "../common/protocol.h"
 #include "../common/utils.h"
+
+void
+check_dir_exist(char *dir) {
+    struct stat s;
+    int rc;
+
+    rc = stat(dir, &s);
+    if(rc == -1) {
+        perror(dir);
+        exit(EXIT_FAILURE);
+    }
+
+    if(S_ISDIR(s.st_mode ) == 0) {
+        printf("%s is not a directory\n", dir);
+        exit(EXIT_FAILURE);
+    }
+}
 
 int
 main(int argc, char **argv)
@@ -36,7 +54,10 @@ main(int argc, char **argv)
     dir1 = argv[optind];
     dir2 = argv[optind+1];
 
-    printf ("Syncing %s and %s\n", dir1, dir2);
+    check_dir_exist(dir1);
+    check_dir_exist(dir2);
+
+    printf("Syncing %s and %s\n", dir1, dir2);
 
 //    explore_dir_rec(argv[1]);
 //    explore_dir_rec(argv[2]);
