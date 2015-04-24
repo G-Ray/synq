@@ -58,7 +58,8 @@ init_tlv_ask_file(TLV * tlv, char * filename) {
 }
 
 int
-init_tlv_meta_file(TLV * tlv, uint64_t mtime, uint64_t size, uint16_t mode, char * filename) {
+init_tlv_meta_file(TLV * tlv, uint64_t mtime, uint64_t size, uint16_t mode,
+                            char * filename) {
     tlv->tl.type = TLV_META_TYPE;
     tlv->tl.length = 3 + 1 + 16 + 2 + 2 + strlen(filename);
     tlv->value.tlv_meta_file.mtime = mtime;

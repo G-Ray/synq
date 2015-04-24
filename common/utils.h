@@ -9,6 +9,10 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
+#include <dirent.h>
+
+void
+explore_dir_rec(char *directory);
 
 static inline char *
 put_8(char *buf, uint8_t c)
