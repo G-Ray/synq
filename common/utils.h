@@ -10,6 +10,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+int
+check_dir_exist(char *dir);
 
 void
 explore_dir_rec(char *directory);

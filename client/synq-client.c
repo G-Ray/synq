@@ -36,11 +36,6 @@ main(int argc, char **argv)
 
     printf ("dry_run = %d\n", dry_run);
 
-    if(dry_run == 1 && argc >3) {
-        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
-
     dir1 = argv[optind];
     dir2 = argv[optind+1];
 
@@ -49,13 +44,22 @@ main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    check_dir_exist(dir1);
-    check_dir_exist(dir2);
+    if(check_dir_exist(dir1) == 1) {
+        printf("%s is not a directory\n", dir1);
+        exit(EXIT_FAILURE);
+    }
 
-    printf("Syncing %s and %s\n", dir1, dir2);
+    if(check_dir_exist(dir2) == 1) {
+        printf("%s is not a directory\n", dir2);
+        exit(EXIT_FAILURE);
+    }
 
-//    explore_dir_rec(argv[1]);
-//    explore_dir_rec(argv[2]);
+    printf("***Syncing %s and %s***\n", dir1, dir2);
+
+    printf("===============\n");
+    explore_dir_rec(dir1);
+    printf("===============\n");
+    explore_dir_rec(dir2);
 
     return 0;
 }
