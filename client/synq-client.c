@@ -33,6 +33,11 @@ main(int argc, char **argv)
     char *dir1;
     char *dir2;
 
+    if(argc < 3) {
+        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     while ((c = getopt (argc, argv, "d")) != -1)
         switch (c)
             {
