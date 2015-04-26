@@ -18,7 +18,7 @@ struct List
 };
 
 List *
-init(char *path);
+init();
 
 void
 insert(List *list, char *path);

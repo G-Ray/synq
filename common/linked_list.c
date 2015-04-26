@@ -1,11 +1,11 @@
 #include "linked_list.h"
 
 List *
-init(char *path) {
+init() {
     List *list = malloc(sizeof(*list));
     File *file = malloc(sizeof(*file));
 
-    file->path = path;
+    file->path = NULL;
     file->next = NULL;
 
     list->head = list->curr = file;
@@ -17,11 +17,15 @@ void
 insert(List *list, char *path)
 {
     File *new = malloc(sizeof(*new));
-    if(list == NULL)
-        list = init(path);
 
     new->path = path;
     new->next = NULL;
+
+    if(list->head->path == NULL) {
+        //insert to the HEAD position
+        list->head->path = path;
+        return;
+    }
 
     // insert to the end
     list->curr->next = new;

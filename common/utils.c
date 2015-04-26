@@ -4,9 +4,7 @@
 List *
 explore_dir_rec(char *directory) {
     List *files = init();
-    //insert(files, "bonjour");
-    //insert(files, "salut");
-    //printList(files);
+
     DIR *dir;
     struct dirent *entry;
     char path[PATH_MAX];
@@ -18,7 +16,7 @@ explore_dir_rec(char *directory) {
         if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, ".." ) == 0)
             continue;
 
-        //printf("%s\n", entry->d_name);
+        printf("%s\n", entry->d_name);
         insert(files, entry->d_name);
 
         if(entry->d_type == DT_DIR) {
