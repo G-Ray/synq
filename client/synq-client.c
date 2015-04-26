@@ -1,29 +1,9 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <sys/stat.h>
 
 #include "../common/protocol.h"
 #include "../common/utils.h"
-
-void
-check_dir_exist(char *dir) {
-    struct stat s;
-    int rc;
-
-    rc = stat(dir, &s);
-    if(rc == -1) {
-        perror(dir);
-        exit(EXIT_FAILURE);
-    }
-
-    if(S_ISDIR(s.st_mode ) == 0) {
-        printf("%s is not a directory\n", dir);
-        exit(EXIT_FAILURE);
-    }
-}
 
 int
 main(int argc, char **argv)
@@ -33,7 +13,7 @@ main(int argc, char **argv)
     char *dir1;
     char *dir2;
 
-    if(argc < 3) {
+    if(argc < 3 || argc > 4) {
         printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
@@ -56,8 +36,18 @@ main(int argc, char **argv)
 
     printf ("dry_run = %d\n", dry_run);
 
+    if(dry_run == 1 && argc >3) {
+        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     dir1 = argv[optind];
     dir2 = argv[optind+1];
+
+    if(dir1 == NULL || dir2 == NULL) {
+        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
     check_dir_exist(dir1);
     check_dir_exist(dir2);
