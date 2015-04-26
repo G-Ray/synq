@@ -14,10 +14,12 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "linked_list.h"
+
 int
 check_dir_exist(char *dir);
 
-void
+List *
 explore_dir_rec(char *directory);
 
 static inline char *

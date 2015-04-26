@@ -4,6 +4,7 @@
 
 #include "../common/protocol.h"
 #include "../common/utils.h"
+#include "../common/linked_list.h"
 
 int
 main(int argc, char **argv)
@@ -56,10 +57,16 @@ main(int argc, char **argv)
 
     printf("***Syncing %s and %s***\n", dir1, dir2);
 
-    printf("===============\n");
-    explore_dir_rec(dir1);
-    printf("===============\n");
-    explore_dir_rec(dir2);
+    printf("========%s========\n", dir1);
+    List * l = explore_dir_rec(dir1);
+
+    printList(l);
+    printf("========%s========\n", dir2);
+    List * l2 = explore_dir_rec(dir2);
+    printList(l2);
+
+    free(l);
+    free(l2);
 
     return 0;
 }

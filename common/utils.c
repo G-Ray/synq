@@ -1,7 +1,12 @@
 #include "utils.h"
+#include "linked_list.h"
 
-void
+List *
 explore_dir_rec(char *directory) {
+    List *files = init();
+    //insert(files, "bonjour");
+    //insert(files, "salut");
+    //printList(files);
     DIR *dir;
     struct dirent *entry;
     char path[PATH_MAX];
@@ -13,18 +18,20 @@ explore_dir_rec(char *directory) {
         if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, ".." ) == 0)
             continue;
 
-        printf("%s\n", entry->d_name);
+        //printf("%s\n", entry->d_name);
+        insert(files, entry->d_name);
 
         if(entry->d_type == DT_DIR) {
             path_length = snprintf (path, PATH_MAX, "%s/%s", directory, entry->d_name);
             if(path_length >= PATH_MAX) {
                 printf("Path too long");
-                return;
+                return NULL;
             }
             explore_dir_rec(path);
         }
     }
     closedir(dir);
+    return files;
 }
 
 int
