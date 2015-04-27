@@ -3,10 +3,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef struct File File;
 struct File {
-    char *path;
+    char path[NAME_MAX+1];
     File *next;
 };
 
@@ -28,5 +29,11 @@ destroy(List *list);
 
 void
 printList(List *list);
+
+int
+searchList(List *list, char * path);
+
+void
+compareLists(List *l);
 
 #endif

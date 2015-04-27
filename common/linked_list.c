@@ -61,3 +61,40 @@ printList(List *list)
     }
     printf("\n-------END OF LIST-------\n\n");
 }
+
+int
+searchList(List *list, char * path)
+{
+    if (list == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    File *current = list->head;
+
+    while (current != NULL)
+    {
+        if(strcmp(current->path, path) == 0)
+            return 1;
+        current = current->next;
+    }
+    return 0;
+}
+
+void
+compareLists(List *list) {
+    if (list == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    File *current = list->head;
+
+    printf("\n------LIST OF FILES------\n");
+    while (current != NULL)
+    {
+        printf("%s -> ", current->path);
+        current = current->next;
+    }
+    printf("\n-------END OF LIST-------\n\n");
+}

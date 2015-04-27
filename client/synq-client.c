@@ -58,15 +58,29 @@ main(int argc, char **argv)
     printf("***Syncing %s and %s***\n", dir1, dir2);
 
     printf("========%s========\n", dir1);
-    List * l = explore_dir_rec(dir1);
+    List *l = explore_dir_rec(dir1);
 
-    printList(l);
+    //printList(l);
     printf("========%s========\n", dir2);
-    List * l2 = explore_dir_rec(dir2);
+    List *l2 = explore_dir_rec(dir2);
+    /*List *l = init();
+    List *l2 = init();
+    insert(l2, "test1");
+    insert(l2, "test2");
+    insert(l2, "test5");
+    insert(l, "test3");
+    insert(l, "test3");
+    insert(l, "test3");
+    insert(l, "test3");
+    printList(l);*/
     printList(l2);
-
-    destroy(l);
     printList(l);
+
+    //compareLists(l);
+    //printList(diff);
+
+    //destroy(l);
+    //destroy(l2);
 
     return 0;
 }

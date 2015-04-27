@@ -3,7 +3,7 @@
 
 List *
 explore_dir_rec(char *directory) {
-    List *files = init();
+    List *list = init();
 
     DIR *dir;
     struct dirent *entry;
@@ -16,8 +16,9 @@ explore_dir_rec(char *directory) {
         if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, ".." ) == 0)
             continue;
 
-        printf("%s\n", entry->d_name);
-        insert(files, entry->d_name);
+        char filename[NAME_MAX];
+        strncpy(filename, entry->d_name, NAME_MAX+1);
+        insert(list, filename);
 
         if(entry->d_type == DT_DIR) {
             path_length = snprintf (path, PATH_MAX, "%s/%s", directory, entry->d_name);
@@ -25,11 +26,11 @@ explore_dir_rec(char *directory) {
                 printf("Path too long");
                 return NULL;
             }
-            explore_dir_rec(path);
+            //explore_dir_rec(path);
         }
     }
     closedir(dir);
-    return files;
+    return list;
 }
 
 int
