@@ -24,6 +24,9 @@ void
 insert(List *list, char *path);
 
 void
+destroy(List *list);
+
+void
 printList(List *list);
 
 #endif

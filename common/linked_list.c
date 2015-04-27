@@ -32,6 +32,17 @@ insert(List *list, char *path)
     list->curr = new;
 }
 
+void destroy(List *list) {
+
+    File *tmp;
+    while (list->head != NULL)
+    {
+        tmp = list->head;
+        list->head = list->head->next;
+        free(tmp);
+    }
+}
+
 void
 printList(List *list)
 {

@@ -65,8 +65,8 @@ main(int argc, char **argv)
     List * l2 = explore_dir_rec(dir2);
     printList(l2);
 
-    free(l);
-    free(l2);
+    destroy(l);
+    printList(l);
 
     return 0;
 }
