@@ -3,27 +3,23 @@
 List *
 init() {
     List *list = malloc(sizeof(*list));
-    File *file = malloc(sizeof(*file));
 
-    file->path = NULL;
-    file->next = NULL;
-
-    list->head = list->curr = file;
+    list->head = NULL;
 
     return list;
 }
 
 void
-insert(List *list, char *path)
+insert(List *list, char path[NAME_MAX+1])
 {
     File *new = malloc(sizeof(*new));
 
-    new->path = path;
+    strncpy(new->path, path, NAME_MAX+1);
     new->next = NULL;
 
-    if(list->head->path == NULL) {
+    if(list->head == NULL) {
         //insert to the HEAD position
-        list->head->path = path;
+        list->head = list->curr = new;
         return;
     }
 
@@ -81,20 +77,25 @@ searchList(List *list, char * path)
     return 0;
 }
 
-void
-compareLists(List *list) {
-    if (list == NULL)
+List *
+compareLists(List *l1, List *l2) {
+    List *diff = init();
+
+    if (l1 == NULL)
     {
         exit(EXIT_FAILURE);
     }
 
-    File *current = list->head;
+    File *current = l1->head;
 
-    printf("\n------LIST OF FILES------\n");
     while (current != NULL)
     {
-        printf("%s -> ", current->path);
+        if(searchList(l2, current->path) == 0) {
+            insert(diff, current->path);
+        }
+
         current = current->next;
     }
-    printf("\n-------END OF LIST-------\n\n");
+
+    return diff;
 }

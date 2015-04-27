@@ -1,10 +1,8 @@
 #include "utils.h"
 #include "linked_list.h"
 
-List *
-explore_dir_rec(char *directory) {
-    List *list = init();
-
+void
+explore_dir_rec(List *list, char *directory) {
     DIR *dir;
     struct dirent *entry;
     char path[PATH_MAX];
@@ -24,13 +22,12 @@ explore_dir_rec(char *directory) {
             path_length = snprintf (path, PATH_MAX, "%s/%s", directory, entry->d_name);
             if(path_length >= PATH_MAX) {
                 printf("Path too long");
-                return NULL;
+                return;
             }
-            //explore_dir_rec(path);
+            explore_dir_rec(list, path);
         }
     }
     closedir(dir);
-    return list;
 }
 
 int

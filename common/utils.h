@@ -19,8 +19,8 @@
 int
 check_dir_exist(char *dir);
 
-List *
-explore_dir_rec(char *directory);
+void
+explore_dir_rec(List * list, char *directory);
 
 static inline char *
 put_8(char *buf, uint8_t c)

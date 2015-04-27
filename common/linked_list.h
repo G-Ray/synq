@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 typedef struct File File;
 struct File {
@@ -33,7 +34,7 @@ printList(List *list);
 int
 searchList(List *list, char * path);
 
-void
-compareLists(List *l);
+List *
+compareLists(List *l1, List *l2);
 
 #endif
