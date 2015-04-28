@@ -52,7 +52,7 @@ printList(List *list)
     printf("\n------LIST OF FILES------\n");
     while (current != NULL)
     {
-        printf("%s -> ", current->path);
+        printf("->%s\n", current->path);
         current = current->next;
     }
     printf("\n-------END OF LIST-------\n\n");

@@ -13,14 +13,19 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include "linked_list.h"
+
+int
+cp(char *from, char *to);
 
 int
 check_dir_exist(char *dir);
 
 void
-explore_dir_rec(List * list, char *directory);
+explore_dir_rec(List * list, char *directory, char *rel_path);
 
 static inline char *
 put_8(char *buf, uint8_t c)
