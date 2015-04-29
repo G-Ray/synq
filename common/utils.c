@@ -14,7 +14,6 @@ cp(char *from, char *to)
         return 0;
     }
 
-    printf("%s\n", from);
     fd_from = open(from, O_RDONLY);
 
     if (fd_from < 0)
