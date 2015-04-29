@@ -60,8 +60,8 @@ main(int argc, char **argv)
     List *l1 = init();
     List *l2 = init();
 
-    explore_dir_rec(l1, dir1, "");
-    explore_dir_rec(l2, dir2, "");
+    explore_dir_rec(l1, dir1, NULL);
+    explore_dir_rec(l2, dir2, NULL);
 
     printf("========Content of %s========\n", dir1);
     printList(l1);
@@ -79,12 +79,13 @@ main(int argc, char **argv)
         char from[PATH_MAX];
         char to[PATH_MAX];
         snprintf (from, PATH_MAX, "%s/%s", dir1, current->path);
-        snprintf (to, PATH_MAX, "%s/%s", dir2, current->path);
+        snprintf (to, PATH_MAX, "%s%s", dir2, current->path);
         cp(from, to);
         printf("COPYING %s TO %s\n", from, to);
         perror("status");
         current = current->next;
     }
+
     //destroy(l);
     //destroy(l2);
 

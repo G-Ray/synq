@@ -85,12 +85,17 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
 
         char filename[NAME_MAX];
         strncpy(filename, entry->d_name, NAME_MAX+1);
-        snprintf (filename, PATH_MAX, "%s/%s", rel_path, entry->d_name);
+        if(rel_path != NULL)
+            snprintf (filename, PATH_MAX, "%s/%s", rel_path, entry->d_name);
         insert(list, filename);
 
         if(entry->d_type == DT_DIR) {
             path_length = snprintf (path, PATH_MAX, "%s/%s", directory, entry->d_name);
-            snprintf(rel, PATH_MAX, "%s/%s", rel_path, entry->d_name);
+            if(rel_path == NULL) {
+                rel_path = "";
+                snprintf(rel, PATH_MAX, "%s%s", rel_path, entry->d_name);
+            }
+            else snprintf(rel, PATH_MAX, "%s/%s", rel_path, entry->d_name);
             if(path_length >= PATH_MAX) {
                 printf("Path too long");
                 return;
