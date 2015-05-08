@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "../common/protocol.h"
 #include "../common/utils.h"
 #include "../common/linked_list.h"
 
-int
+/*int
 main(int argc, char **argv)
 {
     int dry_run = 0;
@@ -118,6 +119,84 @@ main(int argc, char **argv)
 
     //destroy(l);
     //destroy(l2);
+
+    return 0;
+}*/
+
+void send_data(int sock, TLV *tlv) {
+    //char buffer[512];
+
+    printf("version %d\n", tlv->value.tlv_connect.version);
+    printf("magic %d\n", tlv->value.tlv_connect.magic);
+    write(sock, tlv, sizeof(tlv));
+
+    //on attend la reponse du serveur
+    //read(sock, buffer, 255);
+    //printf("message recu : %s", buffer);
+}
+
+int
+tlv_connect(int sock) {
+    TLV *tlv_c = malloc(sizeof(TLV));
+    TLV *tlv_s = malloc(sizeof(TLV));
+    init_tlv_connect(tlv_c);
+
+    write(sock, tlv_c, sizeof(tlv_c));
+    read(sock, tlv_s, sizeof(tlv_s));
+
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    int sockfd;
+    int clientfd;
+    const int PORT = 8080;
+    struct sockaddr_in server;
+    socklen_t serverlen;
+    char buffer[255];
+
+    /************************/
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sockfd < 0)
+        perror("ERROR opening socket");
+
+    memset(&server, 0, sizeof(server));
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_port = htons(PORT);
+
+    serverlen = sizeof(server);
+    if( (connect(sockfd, (struct sockaddr *) &server, serverlen)) < 0 )
+        perror("ERROR connect");
+
+    inet_ntop(AF_INET, &(server.sin_addr), buffer, INET_ADDRSTRLEN);
+    printf("Connected to : %s | Port: %d\n", buffer, ntohs(server.sin_port));
+
+    tlv_connect(sockfd);
+
+    TLV *tlv = malloc(sizeof(TLV));
+
+    init_tlv_ask_files(tlv);
+    write(sockfd, tlv, sizeof(tlv));
+    read(sockfd, tlv, sizeof(tlv));
+    printf("TYPE %d\n", tlv->tl.type);
+    int entries = tlv->value.tlv_entries.entries;
+    printf("ENTRIES %d\n", entries);
+    //free(tlv);
+
+    //TLV *tlv2 = malloc(sizeof(TLV));
+    int i =0;
+    for(i=0; i<entries; i++) {
+        read(sockfd, tlv, sizeof(TLV));
+        printf("TYPE %d\n", tlv->tl.type);
+        printf("file %s\n", tlv->value.tlv_entry.filename);
+    }    
+
+    shutdown(clientfd, SHUT_RDWR);
+    sleep(1);
+    close(clientfd);
 
     return 0;
 }

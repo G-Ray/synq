@@ -1,6 +1,10 @@
 CFLAGS = -Wall
 TARGET = synq-server
-OBJECTS = synq-server.o ../common/protocol.o ../common/utils.o
+OBJECTS =  synq-server.o ../common/protocol.o ../common/utils.o ../common/linked_list.o
 
 all: $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
+
+clean:
+	rm  $(OBJECTS)
+	rm $(TARGET)

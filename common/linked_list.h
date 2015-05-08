@@ -27,6 +27,9 @@ init();
 void
 insert(List *list, char *path, time_t mtime);
 
+int
+countEntries(List *list);
+
 void
 destroy(List *list);
 

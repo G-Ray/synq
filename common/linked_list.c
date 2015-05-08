@@ -84,6 +84,27 @@ searchList(List *list, char * path)
     return NULL;
 }
 
+int
+countEntries(List *list)
+{
+    int entries =0;
+
+    if (list == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    File *current = list->head;
+
+    while (current != NULL)
+    {
+        entries++;
+        current = current->next;
+    }
+
+    return entries;
+}
+
 /* Generate a diff  between l1 and l2 based on modification time of files */
 List *
 compareLists(List *l1, List *l2) {

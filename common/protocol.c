@@ -38,53 +38,53 @@ init_tlv_entries(TLV * tlv, uint64_t entries) {
 }
 
 int
-init_tlv_entry(TLV * tlv, uint64_t mtime, uint64_t size, char * filename) {
+init_tlv_entry(TLV * tlv, uint64_t mtime, uint64_t size, char filename[PATH_MAX]) {
     tlv->tl.type = TLV_ENTRY_TYPE;
     tlv->tl.length = 3 + 1 + 16 + strlen(filename);
+    tlv->value.tlv_entry.size = 60u;
     tlv->value.tlv_entry.mtime = mtime;
-    tlv->value.tlv_entry.size = size;
-    tlv->value.tlv_entry.filename = filename;
+    strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
 
     return 0;
 }
 
 int
-init_tlv_ask_file(TLV * tlv, char * filename) {
+init_tlv_ask_file(TLV * tlv, char filename[PATH_MAX]) {
     tlv->tl.type = TLV_ASK_FILE_TYPE;
     tlv->tl.length = 3 + strlen(filename);
-    tlv->value.tlv_ask_file.filename = filename;
+    strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
 
     return 0;
 }
 
 int
 init_tlv_meta_file(TLV * tlv, uint64_t mtime, uint64_t size, uint16_t mode,
-                            char * filename) {
+                            char filename[PATH_MAX]) {
     tlv->tl.type = TLV_META_TYPE;
     tlv->tl.length = 3 + 1 + 16 + 2 + 2 + strlen(filename);
     tlv->value.tlv_meta_file.mtime = mtime;
     tlv->value.tlv_meta_file.size = size;
     tlv->value.tlv_meta_file.mode = mode;
-    tlv->value.tlv_meta_file.filename = filename;
+    strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
 
     return 0;
 }
 
 int
-init_tlv_delete(TLV *tlv, char * filename) {
+init_tlv_delete(TLV *tlv, char filename[PATH_MAX]) {
     tlv->tl.type = TLV_DELETE_TYPE;
     tlv->tl.length = 3 + strlen(filename);
-    tlv->value.tlv_delete_file.filename = filename;
+    strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
 
     return 0;
 }
 
 int
-init_tlv_error(TLV * tlv, uint8_t errno, char * filename) {
+init_tlv_error(TLV * tlv, uint8_t errno, char filename[PATH_MAX]) {
     tlv->tl.type = TLV_ERROR_TYPE;
     tlv->tl.length = 3 + 1 + strlen(filename);
     tlv->value.tlv_error.errno = errno;
-    tlv->value.tlv_error.filename = filename;
+    strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
 
     return 0;
 }
