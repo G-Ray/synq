@@ -10,11 +10,12 @@ init() {
 }
 
 void
-insert(List *list, char path[NAME_MAX+1])
+insert(List *list, char path[NAME_MAX+1], time_t mtime)
 {
     File *new = malloc(sizeof(*new));
 
     strncpy(new->path, path, NAME_MAX+1);
+    new->mtime = mtime;
     new->next = NULL;
 
     if(list->head == NULL) {
@@ -52,13 +53,18 @@ printList(List *list)
     printf("\n------LIST OF FILES------\n");
     while (current != NULL)
     {
-        printf("->%s\n", current->path);
+        char buff[20];
+        struct tm * timeinfo;
+        timeinfo = localtime(&current->mtime);
+        strftime(buff, sizeof(buff), "%b %d %H:%M", timeinfo);
+
+        printf("->%s ------ %s\n", current->path, buff);
         current = current->next;
     }
     printf("\n-------END OF LIST-------\n\n");
 }
 
-int
+File *
 searchList(List *list, char * path)
 {
     if (list == NULL)
@@ -71,12 +77,14 @@ searchList(List *list, char * path)
     while (current != NULL)
     {
         if(strcmp(current->path, path) == 0)
-            return 1;
+            return current;
+
         current = current->next;
     }
-    return 0;
+    return NULL;
 }
 
+/* Generate a diff  between l1 and l2 based on modification time of files */
 List *
 compareLists(List *l1, List *l2) {
     List *diff = init();
@@ -90,8 +98,12 @@ compareLists(List *l1, List *l2) {
 
     while (current != NULL)
     {
-        if(searchList(l2, current->path) == 0) {
-            insert(diff, current->path);
+        File *f = searchList(l2, current->path);
+        if(f == NULL) {
+            insert(diff, current->path, current->mtime);
+        }
+        else if(f->mtime < current->mtime) {
+            insert(diff, current->path, current->mtime);
         }
 
         current = current->next;

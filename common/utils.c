@@ -2,15 +2,31 @@
 #include "linked_list.h"
 
 int
-cp(char *from, char *to)
+cp(File from,File *to)
 {
     int fd_to, fd_from;
+    struct stat s;
     char buf[4096];
     ssize_t nread;
     int saved_errno;
+    struct utimbuf new_times;
 
-    if(check_dir_exist(from) == 0) {
+    if(check_dir_exist(from->path) == 0) {
         mkdir(to, 0755);
+
+        if (stat(from, &s) < 0) {
+            perror(from);
+            return 1;
+        }
+
+        new_times.actime = s.st_atime;
+        new_times.modtime = s.st_mtime;
+
+        if(utime(to, &new_times) < 0) {
+            perror(to);
+            return 1;
+        }
+
         return 0;
     }
 
@@ -53,6 +69,18 @@ cp(char *from, char *to)
         }
         close(fd_from);
 
+        if (stat(from, &s) < 0) {
+            perror(from);
+            return 1;
+        }
+
+        new_times.actime = s.st_atime;
+        new_times.modtime = s.st_mtime;
+        if(utime(to, &new_times) < 0) {
+            perror(to);
+            return 1;
+        }
+
         /* Success! */
         return 0;
     }
@@ -86,7 +114,15 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
         strncpy(filename, entry->d_name, NAME_MAX+1);
         if(rel_path != NULL)
             snprintf (filename, PATH_MAX, "%s/%s", rel_path, entry->d_name);
-        insert(list, filename);
+
+        struct stat s;
+
+        char test[PATH_MAX];
+        snprintf (test, PATH_MAX, "%s/%s", directory, entry->d_name);
+
+        stat(test, &s);
+
+        insert(list, filename, s.st_mtime);
 
         if(entry->d_type == DT_DIR) {
             path_length = snprintf (path, PATH_MAX, "%s/%s", directory, entry->d_name);
@@ -95,6 +131,7 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
                 snprintf(rel, PATH_MAX, "%s%s", rel_path, entry->d_name);
             }
             else snprintf(rel, PATH_MAX, "%s/%s", rel_path, entry->d_name);
+
             if(path_length >= PATH_MAX) {
                 printf("Path too long");
                 return;

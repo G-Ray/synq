@@ -5,10 +5,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
 
 typedef struct File File;
 struct File {
-    char path[NAME_MAX+1];
+    char path[NAME_MAX + 1];
+    time_t mtime;
     File *next;
 };
 
@@ -23,7 +25,7 @@ List *
 init();
 
 void
-insert(List *list, char *path);
+insert(List *list, char *path, time_t mtime);
 
 void
 destroy(List *list);
@@ -31,7 +33,7 @@ destroy(List *list);
 void
 printList(List *list);
 
-int
+File *
 searchList(List *list, char * path);
 
 List *

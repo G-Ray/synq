@@ -89,8 +89,8 @@ main(int argc, char **argv)
     {
         char from[PATH_MAX];
         char to[PATH_MAX];
-        snprintf (from, PATH_MAX, "%s/%s", dir1, current->path);
-        snprintf (to, PATH_MAX, "%s%s", dir2, current->path);
+        snprintf(from, PATH_MAX, "%s/%s", dir1, current->path);
+        snprintf(to, PATH_MAX, "%s%s", dir2, current->path);
         cp(from, to);
         printf("COPYING %s -> %s\n", from, to);
         perror("status");
