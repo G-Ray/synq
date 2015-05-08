@@ -2,7 +2,7 @@
 #include "linked_list.h"
 
 int
-cp(File from,File *to)
+cp(char *from, char *to)
 {
     int fd_to, fd_from;
     struct stat s;
@@ -11,7 +11,7 @@ cp(File from,File *to)
     int saved_errno;
     struct utimbuf new_times;
 
-    if(check_dir_exist(from->path) == 0) {
+    if(check_dir_exist(from) == 0) {
         mkdir(to, 0755);
 
         if (stat(from, &s) < 0) {
