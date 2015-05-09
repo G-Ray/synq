@@ -21,6 +21,12 @@
 #include "linked_list.h"
 
 int
+upload(int clientfd, const char from[PATH_MAX]);
+
+int
+download(int sockfd, const char from[PATH_MAX], int mtime, int size, int mode);
+
+int
 cp(char *from, char *to);
 
 int

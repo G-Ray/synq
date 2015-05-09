@@ -90,7 +90,7 @@ tlv_connect(int sock) {
 int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
 {
     int sockfd;
-    int clientfd;
+    //int clientfd;
     //const int PORT = 8080;
     struct sockaddr_in server;
     socklen_t serverlen;
@@ -133,51 +133,22 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         strcpy(test, tlv->value.tlv_entry.filename);
     }
 
-    strcpy(test, "synq-client.c");
+    strcpy(test, "protocol.o");
     printf("%s\n", test);
     init_tlv_ask_file(tlv, test);
     write(sockfd, tlv, sizeof(TLV));
     read(sockfd, tlv, sizeof(TLV));
-    printf("%d\n", tlv->value.tlv_meta_file.mtime);
-    printf("%d\n", tlv->value.tlv_meta_file.size);
-    printf("%d\n", tlv->value.tlv_meta_file.mode);
 
     char requested[PATH_MAX];
 
     snprintf(requested, PATH_MAX, "%s/%s", dir, test);
     printf("Downloading %s\n", requested);
+    download(sockfd, requested, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
+    printf("DOWNLOAD FINISHED\n");
+    shutdown(sockfd, SHUT_RDWR);
 
-    int fd_to = open(requested, O_WRONLY | O_CREAT, 0666);
-
-    int BUFFER = 4096;
-    char buf[BUFFER];
-    int nread;
-    int nwritten = 0;
-
-    while (nread = read(sockfd, buf, sizeof buf), nread > 0)
-    {
-        char *out_ptr = buf;
-        ssize_t nwritten;
-
-        do {
-            nwritten = write(fd_to, out_ptr, nread);
-
-            if (nwritten >= 0)
-            {
-                nread -= nwritten;
-                out_ptr += nwritten;
-            }
-            else if (errno != EINTR)
-            {
-                printf("ERROR");
-            }
-        } while (nread > 0);
-        close(fd_to);
-    }
-
-    shutdown(clientfd, SHUT_RDWR);
     sleep(1);
-    close(clientfd);
+    close(sockfd);
 
     return 0;
 }

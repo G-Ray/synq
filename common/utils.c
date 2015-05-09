@@ -2,6 +2,97 @@
 #include "linked_list.h"
 
 int
+upload(int clientfd, const char from[PATH_MAX])
+{
+    int fd_from = open(from, O_RDONLY);
+    int nread;
+    char buf[4096];
+
+    while (nread = read(fd_from, buf, sizeof buf), nread > 0)
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            printf("UP\n");
+            nwritten = write(clientfd, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                printf("ERROR");
+            }
+        } while (nread > 0);
+    }
+    close(fd_from);
+    printf("finished\n");
+    return 0;
+}
+
+int
+download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
+{
+    int BUFFER = 4096;
+    char buf[BUFFER];
+    int nread;
+
+    printf( (mode & S_IRUSR) ? "r" : "-");
+    printf( (mode & S_IWUSR) ? "w" : "-");
+    printf( (mode & S_IXUSR) ? "x" : "-");
+    printf( (mode & S_IRGRP) ? "r" : "-");
+    printf( (mode & S_IWGRP) ? "w" : "-");
+    printf( (mode & S_IXGRP) ? "x" : "-");
+    printf( (mode & S_IROTH) ? "r" : "-");
+    printf( (mode & S_IWOTH) ? "w" : "-");
+    printf( (mode & S_IXOTH) ? "x" : "-");
+    printf("\n\n");
+
+    int fd_to = open(to, O_WRONLY | O_CREAT);
+    struct utimbuf new_times;
+
+    while (nread = read(sockfd, buf, sizeof buf), nread > 0) //nread > 0
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            nwritten = write(fd_to, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                perror("ERROR");
+            }
+        } while (nread > 0);
+    }
+
+    close(fd_to);
+
+    new_times.modtime = mtime;
+
+    if(utime(to, &new_times) < 0) {
+        perror(to);
+        return 1;
+    }
+
+    if(chmod(to, mode) < 0) {
+        perror(to);
+        return 1;
+    }
+
+    printf("finished\n");
+    return 0;
+}
+
+int
 cp(char *from, char *to)
 {
     int fd_to, fd_from;
