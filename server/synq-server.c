@@ -47,6 +47,9 @@ int tlv_connect(int clientfd) {
 }
 
 int tlv_receive(int clientfd) {
+    struct stat st;
+    int rc;
+    char filename[PATH_MAX];
     TLV *tlv = malloc(sizeof(TLV));
     read(clientfd, tlv, sizeof(TLV));
 
@@ -70,9 +73,51 @@ int tlv_receive(int clientfd) {
             }
             break;
 
-        case 3: printf("TYPE 3"); break;
-        case 4: printf("TYPE 4"); break;
-        case 5: printf("TYPE 5"); break;
+        case 3: printf("TYPE 3\n"); break;
+        case 4: printf("TYPE 4\n"); break;
+        case 5:
+            printf("TYPE 5\n");
+            printf("requested file: %s", tlv->value.tlv_entry.filename);
+            snprintf (filename, PATH_MAX, "%s/%s", direct, tlv->value.tlv_entry.filename);
+            rc = stat(filename, &st);
+            if(rc != 0) {
+                perror("Fichier inexistant");
+            }
+            else {
+                init_tlv_meta_file(tlv, st.st_mtime, st.st_size, st.st_mode,
+                                        tlv->value.tlv_entry.filename);
+                write(clientfd, tlv, sizeof(TLV));
+                int fd_from = open(filename, O_RDONLY);
+                int nread;
+                int nwritten;
+                char buf[4096];
+
+                while (nread = read(fd_from, buf, sizeof buf), nread > 0)
+                {
+                    char *out_ptr = buf;
+                    ssize_t nwritten;
+
+                    do {
+                        nwritten = write(clientfd, out_ptr, nread);
+
+                        if (nwritten >= 0)
+                        {
+                            nread -= nwritten;
+                            out_ptr += nwritten;
+                        }
+                        else if (errno != EINTR)
+                        {
+                            printf("ERROR");
+                        }
+                    } while (nread > 0);
+                    close(fd_from);
+                }
+            }
+            break;
+        case 6:
+            printf("TYPE 6\n");
+            break;
+
         default: return 1;
     }
 
@@ -120,6 +165,8 @@ main(int argc, char **argv)
             close(sockfd);
 
             tlv_connect(clientfd);
+            tlv_receive(clientfd);
+
             tlv_receive(clientfd);
 
             //echo(clientfd);

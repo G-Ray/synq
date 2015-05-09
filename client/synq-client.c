@@ -7,68 +7,7 @@
 #include "../common/utils.h"
 #include "../common/linked_list.h"
 
-/*int
-main(int argc, char **argv)
-{
-    int dry_run = 0;
-    int c;
-    char dir1[PATH_MAX];
-    char dir2[PATH_MAX];
-
-    if(argc < 3 || argc > 4) {
-        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
-
-    while ((c = getopt (argc, argv, "d")) != -1)
-        switch (c)
-            {
-                case 'd':
-                    dry_run = 1;
-                    break;
-                case '?':
-                    if (isprint (optopt))
-                        fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-                    else
-                        fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
-                  return 1;
-                default:
-                    abort ();
-            }
-
-    printf ("dry_run = %d\n", dry_run);
-
-    //dir1 = argv[optind];
-    //dir2 = argv[optind+1];
-    strncpy(dir1, argv[optind], PATH_MAX);
-    strncpy(dir2, argv[optind + 1] , PATH_MAX);
-
-    if(dir1 == NULL || dir2 == NULL) {
-        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
-
-    if(check_dir_exist(dir1) == 1) {
-        printf("%s is not a directory\n", dir1);
-        exit(EXIT_FAILURE);
-    }
-
-    if(check_dir_exist(dir2) == 1) {
-        printf("%s is not a directory\n", dir2);
-        exit(EXIT_FAILURE);
-    }
-
-    size_t length = strlen(dir1);
-    if(dir1[length-1] != '/') {
-        strcat(dir1, "/");
-    }
-    length = strlen(dir2);
-    if(dir2[length-1] != '/') {
-        strcat(dir2, "/");
-    }
-
-    printf("Syncing %s with %s\n", dir1, dir2);
-
+int local_sync(char dir1[PATH_MAX], char dir2[PATH_MAX]) {
     List *l1 = init();
     List *l2 = init();
 
@@ -117,11 +56,12 @@ main(int argc, char **argv)
         current = current->next;
     }
 
-    //destroy(l);
-    //destroy(l2);
+    destroy(l1);
+    destroy(l2);
+    destroy(diff);
 
     return 0;
-}*/
+}
 
 void send_data(int sock, TLV *tlv) {
     //char buffer[512];
@@ -147,16 +87,14 @@ tlv_connect(int sock) {
     return 0;
 }
 
-int main(int argc, char** argv)
+int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
 {
     int sockfd;
     int clientfd;
-    const int PORT = 8080;
+    //const int PORT = 8080;
     struct sockaddr_in server;
     socklen_t serverlen;
     char buffer[255];
-
-    /************************/
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0)
@@ -164,8 +102,9 @@ int main(int argc, char** argv)
 
     memset(&server, 0, sizeof(server));
     server.sin_family = AF_INET;
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server.sin_port = htons(PORT);
+
+    server.sin_addr.s_addr = inet_addr(ip);
+    server.sin_port = htons(port);
 
     serverlen = sizeof(server);
     if( (connect(sockfd, (struct sockaddr *) &server, serverlen)) < 0 )
@@ -184,19 +123,143 @@ int main(int argc, char** argv)
     printf("TYPE %d\n", tlv->tl.type);
     int entries = tlv->value.tlv_entries.entries;
     printf("ENTRIES %d\n", entries);
-    //free(tlv);
 
-    //TLV *tlv2 = malloc(sizeof(TLV));
     int i =0;
+    char test[PATH_MAX];
+
     for(i=0; i<entries; i++) {
         read(sockfd, tlv, sizeof(TLV));
-        printf("TYPE %d\n", tlv->tl.type);
-        printf("file %s\n", tlv->value.tlv_entry.filename);
-    }    
+        printf("%s\n", tlv->value.tlv_entry.filename);
+        strcpy(test, tlv->value.tlv_entry.filename);
+    }
+
+    strcpy(test, "synq-client.c");
+    printf("%s\n", test);
+    init_tlv_ask_file(tlv, test);
+    write(sockfd, tlv, sizeof(TLV));
+    read(sockfd, tlv, sizeof(TLV));
+    printf("%d\n", tlv->value.tlv_meta_file.mtime);
+    printf("%d\n", tlv->value.tlv_meta_file.size);
+    printf("%d\n", tlv->value.tlv_meta_file.mode);
+
+    char requested[PATH_MAX];
+
+    snprintf(requested, PATH_MAX, "%s/%s", dir, test);
+    printf("Downloading %s\n", requested);
+
+    int fd_to = open(requested, O_WRONLY | O_CREAT, 0666);
+
+    int BUFFER = 4096;
+    char buf[BUFFER];
+    int nread;
+    int nwritten = 0;
+
+    while (nread = read(sockfd, buf, sizeof buf), nread > 0)
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            nwritten = write(fd_to, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                printf("ERROR");
+            }
+        } while (nread > 0);
+        close(fd_to);
+    }
 
     shutdown(clientfd, SHUT_RDWR);
     sleep(1);
     close(clientfd);
+
+    return 0;
+}
+
+int
+main(int argc, char **argv)
+{
+    int dry_run = 0;
+    int c;
+    char dir1[PATH_MAX];
+    char dir2[PATH_MAX];
+
+    if(argc < 3 || argc > 5) {
+        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    while ((c = getopt (argc, argv, "d")) != -1)
+        switch (c)
+            {
+                case 'd':
+                    dry_run = 1;
+                    break;
+                case '?':
+                    if (isprint (optopt))
+                        fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                    else
+                        fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
+                  return 1;
+                default:
+                    abort ();
+            }
+
+    printf ("dry_run = %d\n", dry_run);
+
+    strncpy(dir1, argv[optind], PATH_MAX);
+    strncpy(dir2, argv[optind + 1] , PATH_MAX);
+
+    if(dir1 == NULL || dir2 == NULL) {
+        printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    if(check_dir_exist(dir1) == 1) {
+        printf("%s is not a directory\n", dir1);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t length = strlen(dir1);
+    if(dir1[length-1] != '/') {
+        strcat(dir1, "/");
+    }
+
+    if(check_dir_exist(dir2) == 1) {
+        //printf("%s is not a directory\n", dir2);
+        int rc = inet_addr(dir2);
+        if(rc == INADDR_NONE) {
+            printf("%s is not an INET address, exiting...\n", dir2);
+            exit(EXIT_FAILURE);
+        }
+        if(argc < 4)  {
+            printf("No port specified, exiting...\n");
+            exit(EXIT_FAILURE);
+        }
+        int port = atoi(argv[optind + 2]);
+        if(port == 0) {
+            printf("Invalid port, exiting...\n");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("Syncing %s with %s:\n", dir1, dir2);
+        remote_sync(dir1, dir2, port);
+        exit(EXIT_FAILURE);
+    }
+
+    length = strlen(dir2);
+    if(dir2[length-1] != '/') {
+        strcat(dir2, "/");
+    }
+
+    printf("Syncing %s with %s\n", dir1, dir2);
+    local_sync(dir1, dir2);
 
     return 0;
 }

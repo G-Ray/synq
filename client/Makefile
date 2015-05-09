@@ -6,5 +6,5 @@ all: $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
 
 clean:
-	rm  $(OBJECTS)
+	rm $(OBJECTS)
 	rm $(TARGET)
