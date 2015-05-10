@@ -23,7 +23,6 @@ void echo(int clientfd) {
     printf("length %d\n",tlv->tl.length);
     printf("version %d\n", tlv->value.tlv_connect.version);
     printf("magic %d\n", tlv->value.tlv_connect.magic);
-    //write(clientfd, buffer, 255);
 }
 
 int tlv_connect(int clientfd) {
@@ -52,6 +51,7 @@ int tlv_receive(int clientfd) {
     char filename[PATH_MAX];
     TLV *tlv = malloc(sizeof(TLV));
     read(clientfd, tlv, sizeof(TLV));
+    printf("OK");
 
     switch(tlv->tl.type) {
         case 2:
@@ -156,20 +156,14 @@ main(int argc, char **argv)
 
             tlv_connect(clientfd);
 
-            tlv_receive(clientfd);
-            //while(1) {
-            tlv_receive(clientfd);
+            while(tlv_receive(clientfd) != 1);
 
-            tlv_receive(clientfd);
-            //}
-
-            //echo(clientfd);
             shutdown(clientfd, SHUT_RDWR);
             sleep(1);
             close(clientfd);
+            printf("CONNECTION CLOSED");
             exit(0);
         }
-        //si erreur...
 
         close(clientfd);
     }

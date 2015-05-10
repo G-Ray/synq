@@ -30,7 +30,7 @@ upload(int clientfd, const char from[PATH_MAX])
     }
 
     close(fd_from);
-    printf("finished\n");
+    printf("upload %s finished\n", from);
     return 0;
 }
 
@@ -68,7 +68,6 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
                 perror("ERROR");
             }
         } while (nread > 0);
-        printf("ICI\n");
         printf("%d : %d\n", total, size);
         if(total == size)
             break;

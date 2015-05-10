@@ -90,11 +90,13 @@ tlv_connect(int sock) {
 int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
 {
     int sockfd;
-    //int clientfd;
-    //const int PORT = 8080;
+    List *local_list = init();
+    List *remote_list = init();
     struct sockaddr_in server;
     socklen_t serverlen;
     char buffer[255];
+
+    explore_dir_rec(local_list, dir, NULL);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd < 0)
@@ -130,22 +132,27 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     for(i=0; i<entries; i++) {
         read(sockfd, tlv, sizeof(TLV));
         printf("%s\n", tlv->value.tlv_entry.filename);
-        strcpy(test, tlv->value.tlv_entry.filename);
+        insert(remote_list, tlv->value.tlv_entry.filename, tlv->value.tlv_entry.mtime);
     }
-    char test[PATH_MAX];
 
-    strcpy(test, "client.o");
-    printf("%s\n", test);
-    init_tlv_ask_file(tlv, test);
-    write(sockfd, tlv, sizeof(TLV));
-    read(sockfd, tlv, sizeof(TLV));
+    List *diff = compareLists(remote_list, local_list);
+    printList(diff);
 
-    char requested[PATH_MAX];
+    File *current = diff->head;
+    while (current != NULL)
+    {
+        char file[PATH_MAX];
+        snprintf (file, PATH_MAX, "%s/%s", dir, current->path);
 
-    snprintf(requested, PATH_MAX, "%s/%s", dir, test);
-    printf("Downloading %s\n", requested);
-    download(sockfd, requested, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
-    printf("DOWNLOAD FINISHED\n");
+        init_tlv_ask_file(tlv, current->path);
+        write(sockfd, tlv, sizeof(TLV));
+        read(sockfd, tlv, sizeof(TLV));
+
+        printf("DOWNLOADING %s\n", current->path);
+        download(sockfd, file, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
+        printf("DOWNLOAD FINISHED\n");
+        current = current->next;
+    }
 
     shutdown(sockfd, SHUT_RDWR);
     sleep(1);
