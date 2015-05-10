@@ -132,8 +132,9 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         printf("%s\n", tlv->value.tlv_entry.filename);
         strcpy(test, tlv->value.tlv_entry.filename);
     }
+    char test[PATH_MAX];
 
-    strcpy(test, "protocol.o");
+    strcpy(test, "client.o");
     printf("%s\n", test);
     init_tlv_ask_file(tlv, test);
     write(sockfd, tlv, sizeof(TLV));
@@ -145,8 +146,8 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     printf("Downloading %s\n", requested);
     download(sockfd, requested, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
     printf("DOWNLOAD FINISHED\n");
-    shutdown(sockfd, SHUT_RDWR);
 
+    shutdown(sockfd, SHUT_RDWR);
     sleep(1);
     close(sockfd);
 

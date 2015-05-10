@@ -158,7 +158,7 @@ main(int argc, char **argv)
 
             tlv_receive(clientfd);
             //while(1) {
-            //tlv_receive(clientfd);
+            tlv_receive(clientfd);
 
             tlv_receive(clientfd);
             //}

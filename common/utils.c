@@ -28,6 +28,7 @@ upload(int clientfd, const char from[PATH_MAX])
             }
         } while (nread > 0);
     }
+
     close(fd_from);
     printf("finished\n");
     return 0;
@@ -39,28 +40,23 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
     int BUFFER = 4096;
     char buf[BUFFER];
     int nread;
-
-    printf( (mode & S_IRUSR) ? "r" : "-");
-    printf( (mode & S_IWUSR) ? "w" : "-");
-    printf( (mode & S_IXUSR) ? "x" : "-");
-    printf( (mode & S_IRGRP) ? "r" : "-");
-    printf( (mode & S_IWGRP) ? "w" : "-");
-    printf( (mode & S_IXGRP) ? "x" : "-");
-    printf( (mode & S_IROTH) ? "r" : "-");
-    printf( (mode & S_IWOTH) ? "w" : "-");
-    printf( (mode & S_IXOTH) ? "x" : "-");
-    printf("\n\n");
+    struct utimbuf new_times;
+    int total = 0;
 
     int fd_to = open(to, O_WRONLY | O_CREAT);
-    struct utimbuf new_times;
 
-    while (nread = read(sockfd, buf, sizeof buf), nread > 0) //nread > 0
+    while (nread = read(sockfd, buf, sizeof buf), nread > 0)
     {
         char *out_ptr = buf;
         ssize_t nwritten;
+        total += nread;
+
+        printf("READ %d\n", nread);
 
         do {
             nwritten = write(fd_to, out_ptr, nread);
+            printf("nwritten %d\n", nwritten);
+            printf("nread %d\n", nread);
 
             if (nwritten >= 0)
             {
@@ -72,6 +68,10 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
                 perror("ERROR");
             }
         } while (nread > 0);
+        printf("ICI\n");
+        printf("%d : %d\n", total, size);
+        if(total == size)
+            break;
     }
 
     close(fd_to);
