@@ -65,7 +65,7 @@ init_tlv_meta_file(TLV * tlv, uint64_t mtime, uint64_t size, uint16_t mode,
     tlv->value.tlv_meta_file.mtime = mtime;
     tlv->value.tlv_meta_file.size = size;
     tlv->value.tlv_meta_file.mode = mode;
-    strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
+    strncpy(tlv->value.tlv_meta_file.filename, filename, PATH_MAX);
 
     return 0;
 }
