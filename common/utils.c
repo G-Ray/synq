@@ -45,6 +45,29 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
 
     printf("SIZE %d\n", size);
 
+    printf( (S_ISDIR(mode)) ? "d" : "-");
+    printf( (mode & S_IRUSR) ? "r" : "-");
+    printf( (mode & S_IWUSR) ? "w" : "-");
+    printf( (mode & S_IXUSR) ? "x" : "-");
+    printf( (mode & S_IRGRP) ? "r" : "-");
+    printf( (mode & S_IWGRP) ? "w" : "-");
+    printf( (mode & S_IXGRP) ? "x" : "-");
+    printf( (mode & S_IROTH) ? "r" : "-");
+    printf( (mode & S_IWOTH) ? "w" : "-");
+    printf( (mode & S_IXOTH) ? "x" : "-");
+    printf("\n\n");
+
+    if(S_ISDIR(mode)) {
+            mkdir(to, mode);
+            new_times.modtime = mtime;
+
+            if(utime(to, &new_times) < 0) {
+                perror(to);
+                return 1;
+            }
+            return 0;
+    }
+
     int fd_to = open(to, O_WRONLY | O_CREAT);
 
     if(size >0)

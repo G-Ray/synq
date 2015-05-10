@@ -51,7 +51,6 @@ int tlv_receive(int clientfd) {
     char filename[PATH_MAX];
     TLV *tlv = malloc(sizeof(TLV));
     read(clientfd, tlv, sizeof(TLV));
-    printf("OK");
 
     switch(tlv->tl.type) {
         case 2:
