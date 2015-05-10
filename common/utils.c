@@ -43,20 +43,6 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
     struct utimbuf new_times;
     int total = 0;
 
-    printf("SIZE %d\n", size);
-
-    printf( (S_ISDIR(mode)) ? "d" : "-");
-    printf( (mode & S_IRUSR) ? "r" : "-");
-    printf( (mode & S_IWUSR) ? "w" : "-");
-    printf( (mode & S_IXUSR) ? "x" : "-");
-    printf( (mode & S_IRGRP) ? "r" : "-");
-    printf( (mode & S_IWGRP) ? "w" : "-");
-    printf( (mode & S_IXGRP) ? "x" : "-");
-    printf( (mode & S_IROTH) ? "r" : "-");
-    printf( (mode & S_IWOTH) ? "w" : "-");
-    printf( (mode & S_IXOTH) ? "x" : "-");
-    printf("\n\n");
-
     if(S_ISDIR(mode)) {
             mode_t process_mask = umask(0);
             mkdir(to, mode);
@@ -234,6 +220,10 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
             snprintf (filename, PATH_MAX, "%s/%s", rel_path, entry->d_name);
 
         struct stat s;
+        char test[PATH_MAX];
+        snprintf (test, PATH_MAX, "%s/%s", directory, entry->d_name);
+
+        stat(test, &s);
 
         insert(list, filename, s.st_mtime);
 
