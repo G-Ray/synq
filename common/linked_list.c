@@ -50,7 +50,7 @@ printList(List *list)
 
     File *current = list->head;
 
-    printf("\n------LIST OF FILES------\n");
+    //printf("\n------LIST OF FILES------\n");
     while (current != NULL)
     {
         char buff[20];
@@ -58,10 +58,10 @@ printList(List *list)
         timeinfo = localtime(&current->mtime);
         strftime(buff, sizeof(buff), "%b %d %H:%M", timeinfo);
 
-        printf("->%s ------ %s\n", current->path, buff);
+        printf("%-40s %s\n", current->path, buff);
         current = current->next;
     }
-    printf("\n-------END OF LIST-------\n\n");
+    printf("-------------------- END OF LIST --------------------\n\n");
 }
 
 File *

@@ -26,14 +26,22 @@ upload(int clientfd, const char from[PATH_MAX])
     int fd_from = open(from, O_RDONLY);
     int nread;
     char buf[4096];
+    struct stat st;
+    int size;
+    int total= 0;
+
+    stat(from, &st);
+    size = st.st_size;
+
+    printf("Uploading %s\n", from);
 
     while (nread = read(fd_from, buf, sizeof buf), nread > 0)
     {
         char *out_ptr = buf;
         ssize_t nwritten;
+        total += nread;
 
         do {
-            printf("UP\n");
             nwritten = write(clientfd, out_ptr, nread);
 
             if (nwritten >= 0)
@@ -45,11 +53,14 @@ upload(int clientfd, const char from[PATH_MAX])
             {
                 printf("ERROR");
             }
+
+            float ratio = (float)total/(float)size;
+            print_progress_bar(45, ratio);
+
         } while (nread > 0);
     }
-
+    printf("\n\n");
     close(fd_from);
-    printf("upload %s finished\n", from);
     return 0;
 }
 
@@ -61,6 +72,8 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
     int nread;
     struct utimbuf new_times;
     int total = 0;
+
+    printf("Downloading %s\n", to);
 
     if(S_ISDIR(mode)) {
             mode_t process_mask = umask(0);
@@ -76,6 +89,8 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
     }
 
     int fd_to = open(to, O_WRONLY | O_CREAT | O_TRUNC);
+    if(fd_to < 0)
+        perror("fd_to");
 
     if(size >0)
         while (nread = read(sockfd, buf, sizeof buf), nread > 0)
@@ -99,13 +114,12 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
             } while (nread > 0);
 
             float ratio = (float)total/(float)size;
-
-            print_progress_bar(60, ratio);
+            print_progress_bar(45, ratio);
 
             if(total == size)
                 break;
         }
-    printf("\n");
+    printf("\n\n");
     close(fd_to);
 
     new_times.modtime = mtime;
@@ -120,7 +134,6 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
         return 1;
     }
 
-    printf("finished\n");
     return 0;
 }
 

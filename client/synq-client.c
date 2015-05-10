@@ -109,8 +109,10 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     server.sin_port = htons(port);
 
     serverlen = sizeof(server);
-    if( (connect(sockfd, (struct sockaddr *) &server, serverlen)) < 0 )
+    if( (connect(sockfd, (struct sockaddr *) &server, serverlen)) < 0 ) {
         perror("ERROR connect");
+        exit(EXIT_FAILURE);
+    }
 
     inet_ntop(AF_INET, &(server.sin_addr), buffer, INET_ADDRSTRLEN);
     printf("Connected to : %s | Port: %d\n", buffer, ntohs(server.sin_port));
@@ -122,20 +124,18 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     init_tlv_ask_files(tlv);
     write(sockfd, tlv, sizeof(tlv));
     read(sockfd, tlv, sizeof(tlv));
-    printf("TYPE %d\n", tlv->tl.type);
     int entries = tlv->value.tlv_entries.entries;
-    printf("ENTRIES %d\n", entries);
 
     int i =0;
     char test[PATH_MAX];
 
     for(i=0; i<entries; i++) {
         read(sockfd, tlv, sizeof(TLV));
-        printf("%s\n", tlv->value.tlv_entry.filename);
         insert(remote_list, tlv->value.tlv_entry.filename, tlv->value.tlv_entry.mtime);
     }
 
     List *diff = compareLists(remote_list, local_list);
+    printf("\n----------------- FILES TO DOWNLOAD -----------------\n");
     printList(diff);
 
     File *current = diff->head;
@@ -148,15 +148,13 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         write(sockfd, tlv, sizeof(TLV));
         read(sockfd, tlv, sizeof(TLV));
 
-        printf("DOWNLOADING %s\n", current->path);
         download(sockfd, file, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
-        printf("DOWNLOAD FINISHED\n");
         current = current->next;
     }
 
     destroy(diff);
     diff = compareLists(local_list, remote_list);
-    printf("A ENVOYER");
+    printf("\n------------------ FILES TO UPLOAD ------------------\n");
     printList(diff);
 
     current = diff->head;
@@ -203,6 +201,8 @@ main(int argc, char **argv)
         printf("Usage: %s [options] <dir1> <ip> <port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
+
+    printf("\n----------------- Synq - alpha release -----------------\n");
 
     while ((c = getopt (argc, argv, "d")) != -1)
         switch (c)
@@ -257,7 +257,7 @@ main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
 
-        printf("Syncing %s with %s:\n", dir1, dir2);
+        printf("Syncing %s with %s\n", dir1, dir2);
         remote_sync(dir1, dir2, port);
         exit(EXIT_FAILURE);
     }

@@ -74,7 +74,7 @@ int tlv_receive(int clientfd) {
         case 4: printf("TYPE 4\n"); break;
         case 5:
             printf("TYPE 5\n");
-            printf("requested file: %s\n", tlv->value.tlv_entry.filename);
+            //printf("requested file: %s\n", tlv->value.tlv_entry.filename);
             snprintf (filename, PATH_MAX, "%s/%s", dir, tlv->value.tlv_entry.filename);
             rc = stat(filename, &st);
             if(rc != 0) {
@@ -91,10 +91,7 @@ int tlv_receive(int clientfd) {
             printf("TYPE 6\n");
             char file[PATH_MAX];
             snprintf (file, PATH_MAX, "%s/%s", dir, tlv->value.tlv_meta_file.filename);
-
-            printf("DOWNLOADING %s\n", file);
             download(clientfd, file, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
-            printf("DOWNLOAD FINISHED\n");
             break;
 
         default: return 1;
