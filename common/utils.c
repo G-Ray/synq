@@ -235,16 +235,11 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
 
         struct stat s;
 
-        char test[PATH_MAX];
-        snprintf (test, PATH_MAX, "%s/%s", directory, entry->d_name);
-
-        stat(test, &s);
-
         insert(list, filename, s.st_mtime);
 
         if(entry->d_type == DT_DIR) {
             path_length = snprintf (path, PATH_MAX, "%s/%s", directory, entry->d_name);
-            if(rel_path == NULL) {
+            if(rel_path == NULL || strcmp(rel_path, "") == 0) {
                 rel_path = "";
                 snprintf(rel, PATH_MAX, "%s%s", rel_path, entry->d_name);
             }

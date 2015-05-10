@@ -154,6 +154,9 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         current = current->next;
     }
 
+    diff = compareLists(local_list, remote_list);
+    printList(diff);    
+
     shutdown(sockfd, SHUT_RDWR);
     sleep(1);
     close(sockfd);
