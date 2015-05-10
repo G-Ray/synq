@@ -230,7 +230,7 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
 
         char filename[NAME_MAX];
         strncpy(filename, entry->d_name, NAME_MAX+1);
-        if(rel_path != NULL)
+        if(rel_path != NULL && strcmp(rel_path, "") !=0)
             snprintf (filename, PATH_MAX, "%s/%s", rel_path, entry->d_name);
 
         struct stat s;
