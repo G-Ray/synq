@@ -101,6 +101,7 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
                printf(" ");
 
             printf("]\r");
+            fflush(stdout);
 
             if(total == size)
                 break;
