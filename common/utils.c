@@ -58,7 +58,9 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
     printf("\n\n");
 
     if(S_ISDIR(mode)) {
+            mode_t process_mask = umask(0);
             mkdir(to, mode);
+            umask(process_mask);
             new_times.modtime = mtime;
 
             if(utime(to, &new_times) < 0) {
