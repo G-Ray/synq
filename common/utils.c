@@ -65,12 +65,12 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
             ssize_t nwritten;
             total += nread;
 
-            printf("READ %d\n", nread);
+            //printf("READ %d\n", nread);
 
             do {
                 nwritten = write(fd_to, out_ptr, nread);
-                printf("nwritten %d\n", nwritten);
-                printf("nread %d\n", nread);
+                //printf("nwritten %d\n", nwritten);
+                //printf("nread %d\n", nread);
 
                 if (nwritten >= 0)
                 {
@@ -82,11 +82,30 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
                     perror("ERROR");
                 }
             } while (nread > 0);
-            printf("%d : %d\n", total, size);
+
+            //printf("%d : %d\n", total, size);
+
+            float ratio = (float)total/(float)size;
+            int w = 70; //width
+            int   c = ratio * w;
+
+            printf("%3d%% [", (int)(ratio*100));
+                        // Show the load bar.
+            int x;
+            for(x=0; x<c; x++)
+               printf("=");
+
+            printf(">");
+
+            for(x=c; x<w; x++)
+               printf(" ");
+
+            printf("]\r");
+
             if(total == size)
                 break;
         }
-
+    printf("\n");
     close(fd_to);
 
     new_times.modtime = mtime;
