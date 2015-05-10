@@ -11,8 +11,6 @@
 #include "../common/utils.h"
 #include "../common/linked_list.h"
 
-#define PORT 8080
-
 char dir[PATH_MAX];
 
 void echo(int clientfd) {
@@ -122,12 +120,18 @@ main(int argc, char **argv)
     struct sockaddr_in client;
     socklen_t clilen;
     char buffer[255];
+    int port;
 
-    if(argc != 2) {
-        printf("Usage: %s <dir1>\n", argv[0]);
+    if(argc != 3) {
+        printf("Usage: %s <dir1> <port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
+    port = atoi(argv[2]);
+    if(port == 0) {
+        printf("Invalid port, exiting...\n");
+        exit(EXIT_FAILURE);
+    }
     strncpy(dir, argv[1], PATH_MAX);
 
     if(check_dir_exist(dir) == 1) {
@@ -144,7 +148,7 @@ main(int argc, char **argv)
     memset(&server, 0, sizeof(server));
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(PORT);
+    server.sin_port = htons(port);
 
     if(bind(sockfd, (struct sockaddr *) &server, sizeof(server)) < 0)
         perror("ERROR on binding");

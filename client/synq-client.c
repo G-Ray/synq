@@ -171,6 +171,7 @@ main(int argc, char **argv)
 
     if(argc < 3 || argc > 5) {
         printf("Usage: %s [options] <dir1> <dir2>\n", argv[0]);
+        printf("Usage: %s [options] <dir1> <ip> <port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
