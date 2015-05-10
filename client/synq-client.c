@@ -154,9 +154,34 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         current = current->next;
     }
 
+    destroy(diff);
     diff = compareLists(local_list, remote_list);
+    printf("A ENVOYER");
     printList(diff);
-    printList(local_list);
+
+    current = diff->head;
+    struct stat st;
+    char filename[PATH_MAX];
+    int rc;
+
+    while (current != NULL)
+    {
+        snprintf (filename, PATH_MAX, "%s/%s", dir, current->path);
+        rc = stat(filename, &st);
+        if(rc != 0) {
+            perror("Fichier inexistant");
+        }
+        char path[PATH_MAX];
+        strncpy(path, current->path, PATH_MAX);
+        init_tlv_meta_file(tlv, st.st_mtime, st.st_size, st.st_mode,
+                                current->path);
+        printf("ENVOI %s \n", tlv->value.tlv_meta_file.filename);
+        current = current->next;
+
+        sleep(1);
+        write(sockfd, tlv, sizeof(TLV));
+        upload(sockfd, filename);
+    }
 
     shutdown(sockfd, SHUT_RDWR);
     sleep(1);

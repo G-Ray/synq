@@ -81,20 +81,6 @@ int tlv_receive(int clientfd) {
                 perror("Fichier inexistant");
             }
             else {
-                printf("ST_MODE %d", st.st_mode);
-                printf("File Permissions: \t");
-                printf( (S_ISDIR(st.st_mode)) ? "d" : "-");
-                printf( (st.st_mode & S_IRUSR) ? "r" : "-");
-                printf( (st.st_mode & S_IWUSR) ? "w" : "-");
-                printf( (st.st_mode & S_IXUSR) ? "x" : "-");
-                printf( (st.st_mode & S_IRGRP) ? "r" : "-");
-                printf( (st.st_mode & S_IWGRP) ? "w" : "-");
-                printf( (st.st_mode & S_IXGRP) ? "x" : "-");
-                printf( (st.st_mode & S_IROTH) ? "r" : "-");
-                printf( (st.st_mode & S_IWOTH) ? "w" : "-");
-                printf( (st.st_mode & S_IXOTH) ? "x" : "-");
-                printf("\n\n");
-
                 init_tlv_meta_file(tlv, st.st_mtime, st.st_size, st.st_mode,
                                         tlv->value.tlv_entry.filename);
                 write(clientfd, tlv, sizeof(TLV));
@@ -103,6 +89,12 @@ int tlv_receive(int clientfd) {
             break;
         case 6:
             printf("TYPE 6\n");
+            char file[PATH_MAX];
+            snprintf (file, PATH_MAX, "%s/%s", dir, tlv->value.tlv_meta_file.filename);
+
+            printf("DOWNLOADING %s\n", file);
+            download(clientfd, file, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
+            printf("DOWNLOAD FINISHED\n");
             break;
 
         default: return 1;
