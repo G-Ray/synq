@@ -13,7 +13,7 @@
 
 #define PORT 8080
 
-char * direct="/home/geoffrey/server/";
+char dir[PATH_MAX];
 
 void echo(int clientfd) {
     TLV *tlv = malloc(sizeof(TLV));
@@ -57,7 +57,7 @@ int tlv_receive(int clientfd) {
         case 2:
             printf("TYPE 2\n");
             List *l1 = init();
-            explore_dir_rec(l1, direct, NULL);
+            explore_dir_rec(l1, dir, NULL);
             int entries = countEntries(l1);
             printf("ENTRIES: %d\n", entries);
             init_tlv_entries(tlv, entries);
@@ -78,7 +78,7 @@ int tlv_receive(int clientfd) {
         case 5:
             printf("TYPE 5\n");
             printf("requested file: %s\n", tlv->value.tlv_entry.filename);
-            snprintf (filename, PATH_MAX, "%s/%s", direct, tlv->value.tlv_entry.filename);
+            snprintf (filename, PATH_MAX, "%s/%s", dir, tlv->value.tlv_entry.filename);
             rc = stat(filename, &st);
             if(rc != 0) {
                 perror("Fichier inexistant");
@@ -123,6 +123,18 @@ main(int argc, char **argv)
     struct sockaddr_in client;
     socklen_t clilen;
     char buffer[255];
+
+    if(argc != 2) {
+        printf("Usage: %s <dir1>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    strncpy(dir, argv[1], PATH_MAX);
+
+    if(check_dir_exist(dir) == 1) {
+        printf("%s is not a directory\n", dir);
+        exit(EXIT_FAILURE);
+    }
 
     /************************/
 

@@ -43,35 +43,38 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
     struct utimbuf new_times;
     int total = 0;
 
+    printf("SIZE %d\n", size);
+
     int fd_to = open(to, O_WRONLY | O_CREAT);
 
-    while (nread = read(sockfd, buf, sizeof buf), nread > 0)
-    {
-        char *out_ptr = buf;
-        ssize_t nwritten;
-        total += nread;
+    if(size >0)
+        while (nread = read(sockfd, buf, sizeof buf), nread > 0)
+        {
+            char *out_ptr = buf;
+            ssize_t nwritten;
+            total += nread;
 
-        printf("READ %d\n", nread);
+            printf("READ %d\n", nread);
 
-        do {
-            nwritten = write(fd_to, out_ptr, nread);
-            printf("nwritten %d\n", nwritten);
-            printf("nread %d\n", nread);
+            do {
+                nwritten = write(fd_to, out_ptr, nread);
+                printf("nwritten %d\n", nwritten);
+                printf("nread %d\n", nread);
 
-            if (nwritten >= 0)
-            {
-                nread -= nwritten;
-                out_ptr += nwritten;
-            }
-            else if (errno != EINTR)
-            {
-                perror("ERROR");
-            }
-        } while (nread > 0);
-        printf("%d : %d\n", total, size);
-        if(total == size)
-            break;
-    }
+                if (nwritten >= 0)
+                {
+                    nread -= nwritten;
+                    out_ptr += nwritten;
+                }
+                else if (errno != EINTR)
+                {
+                    perror("ERROR");
+                }
+            } while (nread > 0);
+            printf("%d : %d\n", total, size);
+            if(total == size)
+                break;
+        }
 
     close(fd_to);
 
