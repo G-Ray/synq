@@ -17,6 +17,8 @@
 
 char dir[PATH_MAX];
 
+// SSL code from http://simplestcodings.blogspot.com.br/2010/08/secure-server-client-using-openssl-in-c.html
+
 SSL_CTX* InitServerCTX(void)
 {
     const SSL_METHOD *method;
@@ -223,7 +225,7 @@ main(int argc, char **argv)
         if (!fork()) { //fils
             close(sockfd);
 
-            if ( SSL_accept(ssl) < 0) {
+            if ( SSL_accept(ssl)< 0) {
                 perror("SSL accept");
             }
 

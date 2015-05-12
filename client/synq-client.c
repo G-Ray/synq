@@ -7,6 +7,8 @@
 #include "../common/utils.h"
 #include "../common/linked_list.h"
 
+// SSL code from http://simplestcodings.blogspot.com.br/2010/08/secure-server-client-using-openssl-in-c.html
+
 int local_sync(char dir1[PATH_MAX], char dir2[PATH_MAX]) {
     List *l1 = init();
     List *l2 = init();
