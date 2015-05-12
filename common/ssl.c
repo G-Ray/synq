@@ -2,6 +2,28 @@
 
 // SSL code from http://simplestcodings.blogspot.com.br/2010/08/secure-server-client-using-openssl-in-c.html
 
+void LoadCertificates(SSL_CTX* ctx, char* CertFile, char* KeyFile)
+{
+    /* set the local certificate from CertFile */
+    if ( SSL_CTX_use_certificate_file(ctx, CertFile, SSL_FILETYPE_PEM) <= 0 )
+    {
+        ERR_print_errors_fp(stderr);
+        abort();
+    }
+    /* set the private key from KeyFile (may be the same as CertFile) */
+    if ( SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0 )
+    {
+        ERR_print_errors_fp(stderr);
+        abort();
+    }
+    /* verify private key */
+    if ( !SSL_CTX_check_private_key(ctx) )
+    {
+        fprintf(stderr, "Private key does not match the public certificate\n");
+        abort();
+    }
+}
+
 SSL_CTX* InitServerCTX(void)
 {
     const SSL_METHOD *method;
