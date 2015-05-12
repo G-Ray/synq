@@ -21,7 +21,7 @@ print_progress_bar(int width, float ratio) {
 }
 
 int
-upload(int clientfd, const char from[PATH_MAX])
+upload(SSL *ssl, const char from[PATH_MAX])
 {
     int fd_from = open(from, O_RDONLY);
     int nread;
@@ -42,7 +42,7 @@ upload(int clientfd, const char from[PATH_MAX])
         total += nread;
 
         do {
-            nwritten = write(clientfd, out_ptr, nread);
+            nwritten = SSL_write(ssl, out_ptr, nread);
 
             if (nwritten >= 0)
             {
@@ -65,7 +65,7 @@ upload(int clientfd, const char from[PATH_MAX])
 }
 
 int
-download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
+download(SSL *ssl, const char to[PATH_MAX], int mtime, int mode, int size)
 {
     int BUFFER = 4096;
     char buf[BUFFER];
@@ -93,7 +93,7 @@ download(int sockfd, const char to[PATH_MAX], int mtime, int mode, int size)
         perror("fd_to");
 
     if(size >0)
-        while (nread = read(sockfd, buf, sizeof buf), nread > 0)
+        while (nread = SSL_read(ssl, buf, sizeof buf), nread > 0)
         {
             char *out_ptr = buf;
             ssize_t nwritten;

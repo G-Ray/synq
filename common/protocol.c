@@ -80,10 +80,10 @@ init_tlv_delete(TLV *tlv, char filename[PATH_MAX]) {
 }
 
 int
-init_tlv_error(TLV * tlv, uint8_t errno, char filename[PATH_MAX]) {
+init_tlv_error(TLV * tlv, uint8_t error, char filename[PATH_MAX]) {
     tlv->tl.type = TLV_ERROR_TYPE;
     tlv->tl.length = 3 + 1 + strlen(filename);
-    tlv->value.tlv_error.errno = errno;
+    tlv->value.tlv_error.error = error;
     strncpy(tlv->value.tlv_entry.filename, filename, PATH_MAX);
 
     return 0;

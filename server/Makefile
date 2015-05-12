@@ -1,4 +1,4 @@
-CFLAGS = -Wall
+CFLAGS = -Wall -L/usr/lib -lssl -lcrypto
 TARGET = synq-server
 OBJECTS =  synq-server.o ../common/protocol.o ../common/utils.o ../common/linked_list.o
 

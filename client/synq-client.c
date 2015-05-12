@@ -76,15 +76,53 @@ void send_data(int sock, TLV *tlv) {
 }
 
 int
-tlv_connect(int sock) {
+tlv_connect(SSL *ssl) {
     TLV *tlv_c = malloc(sizeof(TLV));
     TLV *tlv_s = malloc(sizeof(TLV));
     init_tlv_connect(tlv_c);
 
-    write(sock, tlv_c, sizeof(tlv_c));
-    read(sock, tlv_s, sizeof(tlv_s));
+    SSL_write(ssl, tlv_c, sizeof(tlv_c));
+    SSL_read(ssl, tlv_s, sizeof(tlv_s));
 
     return 0;
+}
+
+SSL_CTX* InitCTX(void)
+{
+    const SSL_METHOD *method;
+    SSL_CTX *ctx;
+
+    OpenSSL_add_all_algorithms();  /* Load cryptos, et.al. */
+    SSL_load_error_strings();   /* Bring in and register error messages */
+    method = SSLv3_client_method();  /* Create new client-method instance */
+    ctx = SSL_CTX_new(method);   /* Create new context */
+    if ( ctx == NULL )
+    {
+        ERR_print_errors_fp(stderr);
+        abort();
+    }
+    return ctx;
+}
+
+void ShowCerts(SSL* ssl)
+{
+    X509 *cert;
+    char *line;
+
+    cert = SSL_get_peer_certificate(ssl); /* get the server's certificate */
+    if ( cert != NULL )
+    {
+        printf("Server certificates:\n");
+        line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+        printf("Subject: %s\n", line);
+        free(line);       /* free the malloc'ed string */
+        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+        printf("Issuer: %s\n", line);
+        free(line);       /* free the malloc'ed string */
+        X509_free(cert);     /* free the malloc'ed certificate copy */
+    }
+    else
+        printf("No certificates.\n");
 }
 
 int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
@@ -95,6 +133,8 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     struct sockaddr_in server;
     socklen_t serverlen;
     char buffer[255];
+    SSL_CTX *ctx;
+    SSL *ssl;
 
     explore_dir_rec(local_list, dir, NULL);
 
@@ -114,23 +154,34 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         exit(EXIT_FAILURE);
     }
 
+    SSL_library_init();
+    ctx = InitCTX();
+    //server = OpenConnection(hostname, atoi(portnum));
+    ssl = SSL_new(ctx);      /* create new SSL connection state */
+    SSL_set_fd(ssl, sockfd);    /* attach the socket descriptor */
+    if ( SSL_connect(ssl) < 0 ) {   /* perform the connection */
+        perror("SSL conect");
+    }
+
+    ShowCerts(ssl);
+
     inet_ntop(AF_INET, &(server.sin_addr), buffer, INET_ADDRSTRLEN);
     printf("Connected to : %s | Port: %d\n", buffer, ntohs(server.sin_port));
 
-    tlv_connect(sockfd);
+    tlv_connect(ssl);
 
     TLV *tlv = malloc(sizeof(TLV));
 
     init_tlv_ask_files(tlv);
-    write(sockfd, tlv, sizeof(tlv));
-    read(sockfd, tlv, sizeof(tlv));
+    SSL_write(ssl, tlv, sizeof(tlv));
+    SSL_read(ssl, tlv, sizeof(tlv));
     int entries = tlv->value.tlv_entries.entries;
 
     int i =0;
     char test[PATH_MAX];
 
     for(i=0; i<entries; i++) {
-        read(sockfd, tlv, sizeof(TLV));
+        SSL_read(ssl, tlv, sizeof(TLV));
         insert(remote_list, tlv->value.tlv_entry.filename, tlv->value.tlv_entry.mtime);
     }
 
@@ -145,10 +196,11 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         snprintf (file, PATH_MAX, "%s/%s", dir, current->path);
 
         init_tlv_ask_file(tlv, current->path);
-        write(sockfd, tlv, sizeof(TLV));
-        read(sockfd, tlv, sizeof(TLV));
+        SSL_write(ssl, tlv, sizeof(TLV));
+        SSL_read(ssl, tlv, sizeof(TLV));
 
-        download(sockfd, file, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
+        download(ssl, file, tlv->value.tlv_meta_file.mtime,
+                        tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
         current = current->next;
     }
 
@@ -177,13 +229,15 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         current = current->next;
 
         sleep(1);
-        write(sockfd, tlv, sizeof(TLV));
-        upload(sockfd, filename);
+        SSL_write(ssl, tlv, sizeof(TLV));
+        upload(ssl, filename);
     }
 
     shutdown(sockfd, SHUT_RDWR);
     sleep(1);
+    SSL_free(ssl);
     close(sockfd);
+    SSL_CTX_free(ctx);
 
     return 0;
 }

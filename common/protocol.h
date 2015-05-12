@@ -70,7 +70,7 @@ typedef struct {
 
 /* #2.9 */
 typedef struct {
-    uint8_t errno;
+    uint8_t error;
     char filename[PATH_MAX];
 } TLV_ERROR;
 

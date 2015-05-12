@@ -17,14 +17,17 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <utime.h>
+//OpenSSL
+#include "openssl/ssl.h"
+#include "openssl/err.h"
 
 #include "linked_list.h"
 
 int
-upload(int clientfd, const char from[PATH_MAX]);
+upload(SSL *ssl, const char from[PATH_MAX]);
 
 int
-download(int sockfd, const char from[PATH_MAX], int mtime, int size, int mode);
+download(SSL *ssl, const char from[PATH_MAX], int mtime, int size, int mode);
 
 int
 cp(char *from, char *to);
