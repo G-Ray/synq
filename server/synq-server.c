@@ -58,7 +58,12 @@ int tlv_receive(SSL *ssl) {
             File *current = l1->head;
             while (current != NULL)
             {
-                init_tlv_entry(tlv, current->mtime, 50, current->path);
+                snprintf (filename, PATH_MAX, "%s/%s", dir, current->path);
+                rc = stat(filename, &st);
+                if(rc != 0) {
+                    perror("Fichier inexistant");
+                }
+                init_tlv_entry(tlv, current->mtime, st.st_size, current->path);
                 SSL_write(ssl, tlv, sizeof(TLV));
                 printf("ENTRY SENT %s\n",  tlv->value.tlv_entry.filename);
                 current = current->next;
