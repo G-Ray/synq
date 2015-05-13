@@ -28,3 +28,5 @@ La liste des fichiers du client et du serveur sont sérialisées respectivement 
 Le serveur vérifie la validité du TLV du connexion du client, puis répond à toutes les demandes du client jusqu'à déconnexion de celui-ci. (ou de l'envoi d'un message invalide).
 
 Les valeurs de retour des fonctions ne sont pas systématiquement vérifiés...
+
+Le projet est sous licence GPL.
