@@ -23,6 +23,9 @@
 
 #include "linked_list.h"
 
+char *
+hashFile(const char from[PATH_MAX]);
+
 int
 fileSize(char *filename);
 

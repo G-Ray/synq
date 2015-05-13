@@ -1,5 +1,35 @@
 #include "utils.h"
 #include "linked_list.h"
+#include <openssl/sha.h>
+
+char *
+hashFile(const char from[PATH_MAX])
+{
+    int nread;
+    char buf[4096];
+    int fd_from;
+    SHA_CTX context;
+    unsigned char md[SHA_DIGEST_LENGTH];
+    int i;
+
+    fd_from = open(from, O_RDONLY);
+
+    SHA1_Init(&context);
+
+    while (nread = read(fd_from, buf, sizeof buf), nread > 0)
+    {
+        SHA1_Update(&context, (unsigned char*) buf, nread);
+    }
+
+    SHA1_Final(md, &context);
+
+    for (i = 0; i < 20; i++) {
+        printf("%02x", md[i]);
+    }
+    printf("\n");
+    close(fd_from);
+    return 0;
+}
 
 // from http://lnxdev.com/view_article.php?id=89
 int fileSize(char *filename) {
@@ -21,11 +51,12 @@ int fileSize(char *filename) {
 
 void
 print_progress_bar(int width, float ratio) {
+    int x;
     int   c = ratio * width;
 
     printf("%3d%% [", (int)(ratio*100));
                 // Show the load bar.
-    int x;
+
     for(x=0; x<c; x++)
        printf("=");
 
@@ -274,6 +305,7 @@ explore_dir_rec(List *list, char *directory, char *rel_path) {
         snprintf (test, PATH_MAX, "%s/%s", directory, entry->d_name);
 
         stat(test, &s);
+        //hashFile(test);
 
         insert(list, filename, s.st_mtime);
 
