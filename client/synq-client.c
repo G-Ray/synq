@@ -143,11 +143,37 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     int entries = tlv->value.tlv_entries.entries;
 
     int i =0;
-    char test[PATH_MAX];
 
     for(i=0; i<entries; i++) {
         SSL_read(ssl, tlv, sizeof(TLV));
         insert(remote_list, tlv->value.tlv_entry.filename, tlv->value.tlv_entry.mtime);
+    }
+
+    List *old_remote = deserializeList("remote_files.synq");
+    List *old_local = deserializeList("local_files.synq");
+    if(old_remote != NULL && old_local != NULL) {
+        printList(old_local);
+        printList(local_list);
+        List *comp = init();
+        comp = compareLists(old_local, local_list);
+        printf("\n----------------- FILES REMOVED - CLIENT SIDE-----------------\n");
+        printList(comp);
+
+        printList(old_remote);
+        printList(remote_list);
+        comp = init();
+        comp = compareLists(old_remote, remote_list);
+        printf("\n----------------- FILES REMOVED - SERVER SIDE -----------------\n");
+        printList(comp);
+
+        /*File *current = comp->head;
+        while (current != NULL)
+        {
+            init_tlv_delete(tlv, current->path);
+            SSL_write(ssl, tlv, sizeof(TLV));
+
+            current = current->next;
+        }*/
     }
 
     List *diff = compareLists(remote_list, local_list);
@@ -190,13 +216,44 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         strncpy(path, current->path, PATH_MAX);
         init_tlv_meta_file(tlv, st.st_mtime, st.st_size, st.st_mode,
                                 current->path);
-        printf("ENVOI %s \n", tlv->value.tlv_meta_file.filename);
         current = current->next;
 
         sleep(1);
         SSL_write(ssl, tlv, sizeof(TLV));
         upload(ssl, filename);
     }
+
+    destroy(local_list);
+    explore_dir_rec(local_list, dir, NULL);
+    init_tlv_ask_files(tlv);
+    SSL_write(ssl, tlv, sizeof(tlv));
+    SSL_read(ssl, tlv, sizeof(tlv));
+    entries = tlv->value.tlv_entries.entries;
+
+    destroy(remote_list);
+    for(i=0; i<entries; i++) {
+        SSL_read(ssl, tlv, sizeof(TLV));
+        insert(remote_list, tlv->value.tlv_entry.filename, tlv->value.tlv_entry.mtime);
+    }
+
+    // Serialize
+    int size = listSize(remote_list);
+    char * data = (char *) malloc(size);
+    serializeList(remote_list, data);
+    FILE *fd_wr;
+    fd_wr = fopen("remote_files.synq", "wb+");
+    fwrite(data, size, 1, fd_wr);
+    //fclose(fd_wr);
+    free(data);
+
+    // Serialize
+    size = listSize(local_list);
+    data = (char *) malloc(size);
+    serializeList(local_list, data);
+    fd_wr = fopen("local_files.synq", "wb+");
+    fwrite(data, size, 1, fd_wr);
+    fclose(fd_wr);
+    free(data);
 
     shutdown(sockfd, SHUT_RDWR);
     sleep(1);

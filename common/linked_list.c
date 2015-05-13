@@ -1,10 +1,66 @@
 #include "linked_list.h"
+#include "utils.h"
 
 List *
 init() {
     List *list = malloc(sizeof(*list));
 
     list->head = NULL;
+
+    return list;
+}
+
+int listSize(List *list)
+{
+    int size = 0;
+
+    File *current = list->head;
+    while(current != NULL) {
+        size += sizeof(current->path);
+        size += sizeof((current->mtime));
+        current = current->next;
+    }
+    return size;
+}
+
+void
+serializeList(List *list, char *buffer) {
+    int cur;
+
+    File *current = list->head;
+    while(current != NULL) {
+        memcpy(&buffer[cur], &current->path, sizeof(current->path));
+        cur += sizeof(current->path); /* move seeker ahead by a byte */
+        memcpy(&buffer[cur], &current->mtime, sizeof(time_t));
+        cur += sizeof(time_t);
+        current = current->next;
+    }
+}
+
+List *
+deserializeList(char file[PATH_MAX]) {
+    int size;
+    int done = 0;
+    char path[PATH_MAX];
+    time_t timet;
+    struct stat s;
+    FILE *fd_rd;
+
+    if(stat(file, &s) < 0)
+        return NULL;
+
+    size = fileSize(file);
+    fd_rd = fopen(file, "rb");
+
+    List *list = init();
+    while(done < size) {
+        fread(path, PATH_MAX, 1, fd_rd);
+        fread(&timet, sizeof(time_t), 1, fd_rd);
+        done += PATH_MAX;
+        done += sizeof(time_t);
+        insert(list, path, timet);
+    }
+    fclose(fd_rd);
 
     return list;
 }

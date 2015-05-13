@@ -1,6 +1,24 @@
 #include "utils.h"
 #include "linked_list.h"
 
+// from http://lnxdev.com/view_article.php?id=89
+int fileSize(char *filename) {
+    struct stat buffer;         /* sys/stat */
+    char path[256];             /* buffer for saving filename */
+    unsigned int size = 0;          /* and this will hold the size returned by this function */
+
+    strcpy(path, "./");         /* assuming that example.data is in the same folder */
+                              /* this program */
+    strcat(path, filename);     /* append filename to after './' */
+
+    if(stat(path, &buffer) < 0) /* get stat structure for example.data */
+        perror(path);
+    else
+        size = buffer.st_size;    /* st_size member of the stat structure holds */
+                              /* the filesize */
+    return size;
+}
+
 void
 print_progress_bar(int width, float ratio) {
     int   c = ratio * width;

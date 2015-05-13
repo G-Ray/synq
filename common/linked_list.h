@@ -6,10 +6,11 @@
 #include <string.h>
 #include <limits.h>
 #include <time.h>
+#include <sys/stat.h>
 
 typedef struct File File;
 struct File {
-    char path[NAME_MAX + 1];
+    char path[PATH_MAX];
     time_t mtime;
     File *next;
 };
@@ -20,6 +21,15 @@ struct List
      File *head;
      File *curr;
 };
+
+List *
+deserializeList(char file[PATH_MAX]);
+
+void
+serializeList(List *list, char *buffer);
+
+int
+listSize(List *list);
 
 List *
 init();

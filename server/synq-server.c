@@ -44,6 +44,7 @@ int tlv_receive(SSL *ssl) {
     char filename[PATH_MAX];
     TLV *tlv = malloc(sizeof(TLV));
     SSL_read(ssl, tlv, sizeof(TLV));
+    char file[PATH_MAX];
 
     switch(tlv->tl.type) {
         case 2:
@@ -89,10 +90,14 @@ int tlv_receive(SSL *ssl) {
             break;
         case 6:
             printf("TYPE 6\n");
-            char file[PATH_MAX];
             snprintf (file, PATH_MAX, "%s/%s", dir, tlv->value.tlv_meta_file.filename);
             download(ssl, file, tlv->value.tlv_meta_file.mtime,  tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
             break;
+        case 7:
+            printf("TYPE 7\n");
+            snprintf (file, PATH_MAX, "%s/%s", dir, tlv->value.tlv_entry.filename);
+            if(unlink(file) < 0)
+                perror("unlink");
 
         default: return 1;
     }

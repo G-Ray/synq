@@ -24,6 +24,9 @@
 #include "linked_list.h"
 
 int
+fileSize(char *filename);
+
+int
 upload(SSL *ssl, const char from[PATH_MAX]);
 
 int
@@ -31,6 +34,9 @@ download(SSL *ssl, const char from[PATH_MAX], int mtime, int size, int mode);
 
 int
 cp(char *from, char *to);
+
+int
+fileSize(char *filename);
 
 int
 check_dir_exist(char *dir);
