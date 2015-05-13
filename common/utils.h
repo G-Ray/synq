@@ -23,6 +23,8 @@
 
 #include "linked_list.h"
 
+int dry_run;
+
 char *
 hashFile(const char from[PATH_MAX]);
 

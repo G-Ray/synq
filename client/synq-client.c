@@ -10,6 +10,8 @@
 //OpenSSL
 #include "../common/ssl.h"
 
+int dry_run;
+
 int local_sync(char dir1[PATH_MAX], char dir2[PATH_MAX]) {
     List *l1 = init();
     List *l2 = init();
@@ -152,15 +154,15 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
     List *old_remote = deserializeList("remote_files.synq");
     List *old_local = deserializeList("local_files.synq");
     if(old_remote != NULL && old_local != NULL) {
-        printList(old_local);
-        printList(local_list);
+        //printList(old_local);
+        //printList(local_list);
         List *comp = init();
         comp = compareLists(old_local, local_list);
         printf("\n----------------- FILES REMOVED - CLIENT SIDE-----------------\n");
         printList(comp);
 
-        printList(old_remote);
-        printList(remote_list);
+        //printList(old_remote);
+        //printList(remote_list);
         comp = init();
         comp = compareLists(old_remote, remote_list);
         printf("\n----------------- FILES REMOVED - SERVER SIDE -----------------\n");
@@ -186,12 +188,14 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         char file[PATH_MAX];
         snprintf (file, PATH_MAX, "%s/%s", dir, current->path);
 
-        init_tlv_ask_file(tlv, current->path);
-        SSL_write(ssl, tlv, sizeof(TLV));
-        SSL_read(ssl, tlv, sizeof(TLV));
+        if(dry_run == 0) {
+            init_tlv_ask_file(tlv, current->path);
+            SSL_write(ssl, tlv, sizeof(TLV));
+            SSL_read(ssl, tlv, sizeof(TLV));
 
-        download(ssl, file, tlv->value.tlv_meta_file.mtime,
-                        tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
+            download(ssl, file, tlv->value.tlv_meta_file.mtime,
+                            tlv->value.tlv_meta_file.mode, tlv->value.tlv_meta_file.size);
+        }
         current = current->next;
     }
 
@@ -214,13 +218,15 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
         }
         char path[PATH_MAX];
         strncpy(path, current->path, PATH_MAX);
-        init_tlv_meta_file(tlv, st.st_mtime, st.st_size, st.st_mode,
-                                current->path);
-        current = current->next;
+        if(dry_run == 0) {
+            init_tlv_meta_file(tlv, st.st_mtime, st.st_size, st.st_mode,
+                                    current->path);
+            current = current->next;
 
-        sleep(1);
-        SSL_write(ssl, tlv, sizeof(TLV));
-        upload(ssl, filename);
+            sleep(1);
+            SSL_write(ssl, tlv, sizeof(TLV));
+            upload(ssl, filename);
+        }
     }
 
     destroy(local_list);
@@ -267,7 +273,6 @@ int remote_sync(char dir[PATH_MAX], char *ip, uint16_t port)
 int
 main(int argc, char **argv)
 {
-    int dry_run = 0;
     int c;
     char dir1[PATH_MAX];
     char dir2[PATH_MAX];

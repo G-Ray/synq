@@ -72,6 +72,8 @@ print_progress_bar(int width, float ratio) {
 int
 upload(SSL *ssl, const char from[PATH_MAX])
 {
+    if(dry_run==1) return 0;
+
     int fd_from = open(from, O_RDONLY);
     int nread;
     char buf[4096];
@@ -116,11 +118,14 @@ upload(SSL *ssl, const char from[PATH_MAX])
 int
 download(SSL *ssl, const char to[PATH_MAX], int mtime, int mode, int size)
 {
+    if(dry_run==1) return 0;
+
     int BUFFER = 4096;
     char buf[BUFFER];
     int nread;
     struct utimbuf new_times;
     int total = 0;
+    printf("DRY_RUN %d", dry_run);
 
     printf("Downloading %s\n", to);
 
@@ -189,6 +194,8 @@ download(SSL *ssl, const char to[PATH_MAX], int mtime, int mode, int size)
 int
 cp(char *from, char *to)
 {
+    if(dry_run==1) return 0;
+
     int fd_to, fd_from;
     struct stat s;
     char buf[4096];
